@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.NonNull;
 import org.reflections.Reflections;
-import dev.sanda.datafi.generator.BasePackageResolver;
+import dev.sanda.datafi.code_generator.BasePackageResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

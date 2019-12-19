@@ -1,4 +1,4 @@
-package dev.sanda.datafi.annotations.resolvers;
+package dev.sanda.datafi.annotations.finders;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -12,5 +12,5 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  */
 @Target({FIELD, TYPE})
 @Retention(SOURCE)
-public @interface GetBy {
+public @interface FindBy {
 }

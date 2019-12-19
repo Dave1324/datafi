@@ -1,4 +1,4 @@
-package dev.sanda.datafi.generator;
+package dev.sanda.datafi.code_generator;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;

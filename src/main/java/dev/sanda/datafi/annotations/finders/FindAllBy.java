@@ -1,4 +1,4 @@
-package dev.sanda.datafi.annotations.resolvers;
+package dev.sanda.datafi.annotations.finders;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -15,5 +15,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({FIELD, TYPE})
 @Retention(RUNTIME)
-public @interface GetAllBy {
+public @interface FindAllBy {
 }

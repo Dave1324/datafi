@@ -1,4 +1,4 @@
-package dev.sanda.datafi.generator;
+package dev.sanda.datafi.code_generator;
 
 public enum QueryType {
     //SELECT en FROM entityName

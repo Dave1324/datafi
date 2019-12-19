@@ -1,12 +1,12 @@
-package dev.sanda.datafi.generator;
+package dev.sanda.datafi.code_generator;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import dev.sanda.datafi.StaticUtils;
-import dev.sanda.datafi.annotations.resolvers.GetAllBy;
-import dev.sanda.datafi.annotations.resolvers.GetBy;
-import dev.sanda.datafi.annotations.resolvers.GetByUnique;
+import dev.sanda.datafi.annotations.finders.FindAllBy;
+import dev.sanda.datafi.annotations.finders.FindBy;
+import dev.sanda.datafi.annotations.finders.FindByUnique;
 import dev.sanda.datafi.persistence.GenericDao;
 import lombok.Data;
 import lombok.NonNull;
@@ -60,16 +60,16 @@ public class DaoFactory {
         StaticUtils.writeToJavaFile(entity.getSimpleName().toString(), packageName, builder, processingEnv, "JpaRepository");
     }
     private void handleAnnotatedField(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
-        if(annotatedField.getAnnotation(GetBy.class) != null)
+        if(annotatedField.getAnnotation(FindBy.class) != null)
             handleGetBy(entity, builder, annotatedField);
-        if(annotatedField.getAnnotation(GetAllBy.class) != null)
+        if(annotatedField.getAnnotation(FindAllBy.class) != null)
             handleGetAllBy(entity, builder, annotatedField);
-        if(annotatedField.getAnnotation(GetByUnique.class) != null)
+        if(annotatedField.getAnnotation(FindByUnique.class) != null)
             handleGetByUnique(entity, builder, annotatedField);
     }
 
     private void handleGetByUnique(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
-        if(annotatedField.getAnnotation(GetBy.class) != null){
+        if(annotatedField.getAnnotation(FindBy.class) != null){
             StaticUtils.logCompilationError(processingEnv, annotatedField, "@GetBy and @GetByUnique cannot by definition be used together");
         }else if(annotatedField.getAnnotation(Column.class) == null || !annotatedField.getAnnotation(Column.class).unique()){
             StaticUtils.logCompilationError(processingEnv, annotatedField, "In order to use @GetByUnique on a field, annotate the field as @Column(unique = true)");

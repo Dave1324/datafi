@@ -1,8 +1,9 @@
-package dev.sanda.datafi.generator;
+package dev.sanda.datafi.code_generator;
 
 
 import com.squareup.javapoet.*;
 import dev.sanda.datafi.annotations.WithResolver;
+import dev.sanda.datafi.code_generator.query.CustomSQLQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,7 +19,7 @@ import java.util.Map;
 
 public class SqlQueryMethodParser {
 
-    public static MethodSpec parseResolver(WithResolver resolver, TypeElement typeElement){
+    /*public static MethodSpec parseCustomQuery(CustomSQLQuery query, TypeElement typeElement){
         String prefix = prefix(resolver, typeElement);
         String whereClause = whereClause(resolver, typeElement);
         ParameterSpec[] args = args(resolver, typeElement);
@@ -31,7 +32,7 @@ public class SqlQueryMethodParser {
                 .addParameters(Arrays.asList(args))
                 .returns(returnType(resolver, typeElement))
                 .build();
-    }
+    }*/
 
     private static TypeName returnType(WithResolver resolver, TypeElement typeElement) {
         TypeName result;

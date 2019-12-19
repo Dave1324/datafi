@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface WithQueries {
+public @interface WithQueryScripts {
     String[] value();
     @AliasFor("value")
     String[] queries();

@@ -1,4 +1,4 @@
-package dev.sanda.datafi.generator;
+package dev.sanda.datafi.code_generator;
 
 import com.squareup.javapoet.*;
 import dev.sanda.datafi.StaticUtils;

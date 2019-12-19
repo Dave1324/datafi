@@ -1,4 +1,4 @@
-package dev.sanda.datafi.generator;
+package dev.sanda.datafi.code_generator;
 
 
 import com.google.auto.service.AutoService;
@@ -6,6 +6,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import dev.sanda.datafi.StaticUtils;
+import dev.sanda.datafi.code_generator.query.CustomSQLQueryFactory;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,7 +34,7 @@ public class DataLayerAnnotationsProcessor extends AbstractProcessor {
         if(entities.isEmpty()) return false;
         Map<TypeElement, List<VariableElement>> annotatedFieldsMap = new HashMap<>();
         Map<TypeElement, List<MethodSpec>> customResolversMap = new HashMap<>();
-        CustomResolversFactory.resolveCustomResolvers(entities, annotatedFieldsMap, customResolversMap);
+        CustomSQLQueryFactory.constructCustomQueries(entities, annotatedFieldsMap, customResolversMap);
         FuzzySearchMethodsFactory fuzzySearchMethodsFactory = new FuzzySearchMethodsFactory(processingEnv);
         Map<TypeElement, MethodSpec> fuzzySearchMethodsMap =
                 fuzzySearchMethodsFactory.resolveFuzzySearchMethods(entities);
