@@ -40,8 +40,6 @@ public class AnnotationProcessor extends AbstractProcessor {
         entities.forEach(entity -> {
             daoFactory.generateDao(entity, annotatedFieldsMap, customSqlQueriesMap, searchMethodsMap);
             dataManagerFactory.addDataManager(entity);
-            if(StaticUtils.isArchivable(entity, processingEnv))
-                dataManagerFactory.addArchivableDataManager(entity);
         });
         dataManagerFactory.addBasePackageResolver();
         dataManagerFactory.writeToFile();

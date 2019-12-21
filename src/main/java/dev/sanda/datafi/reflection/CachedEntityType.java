@@ -14,6 +14,9 @@ import java.util.*;
 @lombok.Getter
 public class CachedEntityType {
 
+    private Field idField;
+    private Field isArchivedField;
+
     private Class<?> clazz;
     private Object defaultInstance;
     private Map<String, CachedEntityField> fields;
@@ -30,6 +33,14 @@ public class CachedEntityType {
             boolean isNonApiUpdatable = isNonApiUpdatable(field);
             boolean isNonNullable = isNonNullableField(field);
             this.fields.put(field.getName(), new CachedEntityField(field, isCollectionOrMap, isNonApiUpdatable, isNonNullable));
+            if(field.isAnnotationPresent(Id.class)) {
+                this.idField = field;
+                this.idField.setAccessible(true);
+            }
+            if(field.getName().equals("isArchived") && (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class))) {
+                this.isArchivedField = field;
+                this.isArchivedField.setAccessible(true);
+            }
         });
         this.publicMethods = new HashMap<>();
         publicMethods.forEach(publicMethod -> this.publicMethods.put(publicMethod.getName(), publicMethod));
@@ -103,5 +114,28 @@ public class CachedEntityType {
             if(!_field.isNonApiUpdatable())
                 cascadeUpdatableFields.add(_field.getField());
         });
+    }
+
+    public Object getId(Object instance){
+        try {
+            return this.idField.get(instance);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public boolean getIsArchived(Object instance){
+        try {
+            return (boolean) this.isArchivedField.get(instance);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setIsArchived(Object instance, boolean value){
+        try {
+            this.isArchivedField.set(instance, value);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

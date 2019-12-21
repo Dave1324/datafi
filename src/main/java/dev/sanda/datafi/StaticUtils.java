@@ -5,7 +5,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.reflection.CachedEntityType;
 import dev.sanda.datafi.reflection.ReflectionCache;
 import org.apache.commons.lang3.StringUtils;
@@ -144,10 +143,6 @@ public class StaticUtils {
         entities.addAll((Collection<? extends TypeElement>) roundEnvironment.getElementsAnnotatedWith(Entity.class));
         entities.addAll((Collection<? extends TypeElement>) roundEnvironment.getElementsAnnotatedWith(Table.class));
         return Sets.newHashSet(entities);
-    }
-
-    public static boolean isArchivable(TypeElement element, ProcessingEnvironment processingEnv) {
-        return processingEnv.getTypeUtils().isAssignable(element.asType(), processingEnv.getElementUtils().getTypeElement(Archivable.class.getCanonicalName()).asType());
     }
 
     public static String camelCaseNameOf(Element element) {
