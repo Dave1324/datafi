@@ -5,11 +5,10 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import dev.sanda.datafi.StaticUtils;
+import dev.sanda.datafi.service.DataManager;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.var;
-import dev.sanda.datafi.service.ArchivableDataManager;
-import dev.sanda.datafi.service.DataManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -27,7 +26,6 @@ public class DataManagerFactory {
 
     private TypeSpec.Builder dataManagersConfig = initDataManagerConfig();
     private final static ClassName dataManagerType = ClassName.get(DataManager.class);
-    private final static ClassName archivableDataManagerType = ClassName.get(ArchivableDataManager.class);
 
     public void addDataManager(TypeElement entity){
         final ClassName entityType = ClassName.get(entity);
@@ -50,18 +48,6 @@ public class DataManagerFactory {
                 .build());
     }
 
-    public void addArchivableDataManager(TypeElement entity){
-        final ClassName entityType = ClassName.get(entity);
-        var builder =
-                MethodSpec
-                        .methodBuilder(StaticUtils.camelCaseNameOf(entity) + "ArchivableDataManager")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Bean.class)
-                        .returns(ParameterizedTypeName.get(archivableDataManagerType, entityType))
-                        .addStatement("return new $T($T.class)", archivableDataManagerType, entityType);
-        dataManagersConfig.addMethod(builder.build());
-    }
-
     private static TypeSpec.Builder initDataManagerConfig(){
         return TypeSpec.classBuilder("DataManagersConfig")
                 .addAnnotation(Configuration.class)
@@ -71,13 +57,6 @@ public class DataManagerFactory {
                         .addAnnotation(Primary.class)
                         .returns(dataManagerType)
                         .addStatement("return new $T()", dataManagerType)
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("nullTypeArchivableDataManager")
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Bean.class)
-                        .addAnnotation(Primary.class)
-                        .returns(archivableDataManagerType)
-                        .addStatement("return new $T()", archivableDataManagerType)
                         .build());
     }
     public void writeToFile(){
