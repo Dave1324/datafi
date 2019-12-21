@@ -1,6 +1,7 @@
 package dev.sanda.datafi.code_generator.query;
 
 import com.squareup.javapoet.*;
+import dev.sanda.datafi.StaticUtils;
 import dev.sanda.datafi.annotations.query.WithNativeQuery;
 import dev.sanda.datafi.annotations.query.WithNativeQueryScripts;
 import dev.sanda.datafi.annotations.query.WithQuery;
@@ -9,7 +10,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.var;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.util.FileCopyUtils;
 
@@ -18,23 +18,26 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.immutableEntry;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RequiredArgsConstructor
 public class CustomSQLQueryFactory {
 
     @NonNull
     private ProcessingEnvironment env;
-    @NonNull
+
     private Map<TypeElement, Map<String, TypeName>> entitiesFields;
 
     public Map<TypeElement, List<MethodSpec>> constructCustomQueries(Set<? extends TypeElement> entities) {
+        entitiesFields = StaticUtils.getEntitiesFieldsMap(entities);
         Map<TypeElement, List<MethodSpec>> customQueriesMap = new HashMap<>();
         for (TypeElement entity : entities) {
             List<CustomSQLQuery> customQueries = getCustomSQLQueries(entity);
@@ -107,7 +110,7 @@ public class CustomSQLQueryFactory {
         //validate and assign filename as query name
         String name = formatAndValidateName(Objects.requireNonNull(resource.getFilename()));
         //read sql string from file
-        String sql = resourceToString(resource);
+        String sql = sqlResourceToString(resource.getPath());
         return parseQuery(name, sql, entity);
     }
 
@@ -127,19 +130,16 @@ public class CustomSQLQueryFactory {
         return customSQLQuery;
     }
 
-    private QueryReturnSignature determineSQLReturnSignature(String sqlString) {
-        final String sql = sqlString.toUpperCase();
+    private ReturnPlurality determineSQLReturnSignature(String sqlString) {
+        final String[] sql = sqlString.toUpperCase().split(" ");
         boolean isUnique =
-                sql.endsWith("LIMIT 1") ||
-                sql.substring(0, sql.indexOf(" ")).equals("INSERT") ||
-                sql.substring(0, sql.indexOf(" ")).equals("REPLACE");
-        if(isUnique)
-            return QueryReturnSignature.SINGLE_RECORD;
-        else
-            return QueryReturnSignature.LIST_OF_RECORDS;
+                (sql[sql.length - 2] + " " + sql[sql.length - 1]).equals("LIMIT 1") ||
+                sql[0].equals("INSERT") ||
+                sql[0].equals("REPLACE");
+        return isUnique ? ReturnPlurality.SINGLE : ReturnPlurality.BATCH;
     }
 
-    private String parseSqlString(String sql, Map<String, TypeName> args, TypeElement entity) {
+    private String parseSqlString(String sql, LinkedHashMap<String, TypeName> args, TypeElement entity) {
         String lineSeparator = System.getProperty("line.separator");
         String formattedSqlString =
                 sql
@@ -202,24 +202,31 @@ public class CustomSQLQueryFactory {
         boolean isList = typeNameString.endsWith("[]");
         if(isList) typeNameString = typeNameString.substring(0, typeNameString.indexOf("["));
         switch (typeNameString){
-            case "byte": argClazz = byte.class; break;
-            case "Byte": argClazz = Byte.class; break;
-            case "short": argClazz = short.class; break;
-            case "Short": argClazz = Short.class; break;
-            case "int": argClazz = int.class; break;
-            case "Integer": argClazz = Integer.class; break;
-            case "long": argClazz = long.class; break;
-            case "Long": argClazz = Long.class; break;
-            case "float": argClazz = float.class; break;
-            case "Float": argClazz = Float.class; break;
-            case "double": argClazz = double.class; break;
-            case "Double": argClazz = Double.class; break;
-            case "boolean": argClazz = boolean.class; break;
-            case "Boolean": argClazz = Boolean.class; break;
-            case "char": argClazz = char.class; break;
-            case "Character": argClazz = Character.class; break;
+            case "byte":
+            case "Byte":
+                argClazz = Byte.class; break;
+            case "short":
+            case "Short":
+                argClazz = Short.class; break;
+            case "int":
+            case "Integer":
+                argClazz = Integer.class; break;
+            case "long":
+            case "Long":
+                argClazz = Long.class; break;
+            case "float":
+            case "Float":
+                argClazz = Float.class; break;
+            case "double":
+            case "Double":
+                argClazz = Double.class; break;
+            case "boolean":
+            case "Boolean":
+                argClazz = Boolean.class; break;
+            case "char":
+            case "Character":
+                argClazz = Character.class; break;
             case "String": argClazz = String.class; break;
-            case "string": argClazz = String.class; break;
             default: return null;
         }
         if(isList)
@@ -230,10 +237,12 @@ public class CustomSQLQueryFactory {
 
     private String formatAndValidateName(String name) {
         String trimmedName = name.trim();
+        if(trimmedName.endsWith(".sql"))
+            trimmedName = trimmedName.substring(0, trimmedName.indexOf(".sql"));
         if(!isValidJavaIdentifier(trimmedName)){
             compilationFailureWithMessage(invalidNameMessage(trimmedName), env);
         }
-        return name;
+        return trimmedName;
     }
 
     private static void compilationFailureWithMessage(String message, ProcessingEnvironment env) {
@@ -268,9 +277,14 @@ public class CustomSQLQueryFactory {
         return result;
     }
 
-    public String resourceToString(Resource resource) {
-        try (Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8)) {
-            return FileCopyUtils.copyToString(reader);
+    private String sqlResourceToString(String resourcePath) {
+        try {
+            FileObject sqlFileObject = env.getFiler()
+                    .getResource( StandardLocation.CLASS_OUTPUT, "", resourcePath );
+            InputStream sqlFileStream = sqlFileObject.openInputStream();
+            String raw = FileCopyUtils.copyToString(new InputStreamReader(sqlFileStream));
+            Pattern commentPattern = Pattern.compile("(?:/\\*[^;]*?\\*/)|(?:--[^;]*?$)", Pattern.DOTALL | Pattern.MULTILINE);
+            return commentPattern.matcher(raw).replaceAll("");
         } catch (IOException e) {
             compilationFailureWithMessage(e.toString(), env);
             return null;

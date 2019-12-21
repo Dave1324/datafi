@@ -5,7 +5,7 @@ import lombok.Data;
 import org.springframework.data.repository.query.Param;
 
 import javax.lang.model.element.TypeElement;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,14 +16,14 @@ public class CustomSQLQuery {
     private String name;
     private String sql;
     private boolean isNative = false;
-    private Map<String, TypeName> args = new HashMap<>();
-    private QueryReturnSignature returnSignature;
+    private LinkedHashMap<String, TypeName> args = new LinkedHashMap<>();
+    private ReturnPlurality returnSignature;
 
     public TypeName returnTypeName() {
         switch (returnSignature){
-            case SINGLE_RECORD:
+            case SINGLE:
                 return ClassName.get(annotatedEntity);
-            case LIST_OF_RECORDS:
+            case BATCH:
                 return ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(annotatedEntity));
             default: return null;
         }

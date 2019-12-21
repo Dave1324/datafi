@@ -32,12 +32,12 @@ public class DaoFactory {
      * generate the actual '<entity name>Dao.java' jpa repository for a given entity
      * @param entity - the given data model entity / table
      * @param annotatedFieldsMap - a reference telling us whether this repository needs any custom
-     * @param customResolversMap
+     * @param customSQLQueriesMap
      */
     protected void generateDao(
             TypeElement entity,
             Map<TypeElement, List<VariableElement>> annotatedFieldsMap,
-            Map<TypeElement, List<MethodSpec>> customResolversMap,
+            Map<TypeElement, List<MethodSpec>> customSQLQueriesMap,
             Map<TypeElement, MethodSpec> fuzzySearchMethods) {
 
         String className = entity.getQualifiedName().toString();
@@ -53,22 +53,22 @@ public class DaoFactory {
         Collection<VariableElement> annotatedFields = annotatedFieldsMap.get(entity);
         if(annotatedFields != null)
             annotatedFields.forEach(annotatedField -> handleAnnotatedField(entity, builder, annotatedField));
-        if(customResolversMap.get(entity) != null)
-            customResolversMap.get(entity).forEach(builder::addMethod);
+        if(customSQLQueriesMap.get(entity) != null)
+            customSQLQueriesMap.get(entity).forEach(builder::addMethod);
         if(fuzzySearchMethods.get(entity) != null)
             builder.addMethod(fuzzySearchMethods.get(entity));
         StaticUtils.writeToJavaFile(entity.getSimpleName().toString(), packageName, builder, processingEnv, "JpaRepository");
     }
     private void handleAnnotatedField(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
         if(annotatedField.getAnnotation(FindBy.class) != null)
-            handleGetBy(entity, builder, annotatedField);
+            handleFindBy(entity, builder, annotatedField);
         if(annotatedField.getAnnotation(FindAllBy.class) != null)
-            handleGetAllBy(entity, builder, annotatedField);
+            handleFindAllBy(entity, builder, annotatedField);
         if(annotatedField.getAnnotation(FindByUnique.class) != null)
-            handleGetByUnique(entity, builder, annotatedField);
+            handleFindByUnique(entity, builder, annotatedField);
     }
 
-    private void handleGetByUnique(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
+    private void handleFindByUnique(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
         if(annotatedField.getAnnotation(FindBy.class) != null){
             StaticUtils.logCompilationError(processingEnv, annotatedField, "@GetBy and @GetByUnique cannot by definition be used together");
         }else if(annotatedField.getAnnotation(Column.class) == null || !annotatedField.getAnnotation(Column.class).unique()){
@@ -88,7 +88,7 @@ public class DaoFactory {
         }
     }
 
-    private void handleGetAllBy(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
+    private void handleFindAllBy(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
         builder
                 .addMethod(MethodSpec
                         .methodBuilder(
@@ -101,7 +101,7 @@ public class DaoFactory {
                         .build());
     }
 
-    private void handleGetBy(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
+    private void handleFindBy(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
         builder
                 .addMethod(MethodSpec
                         .methodBuilder(
