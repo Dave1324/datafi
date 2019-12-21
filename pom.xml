@@ -11,6 +11,7 @@
         <relativePath/>
     </parent>
 
+    <groupId>dev.sanda</groupId>
     <artifactId>datafi</artifactId>
     <version>0.0.2</version>
 
