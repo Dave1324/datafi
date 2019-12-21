@@ -38,7 +38,7 @@ public class DaoFactory {
             TypeElement entity,
             Map<TypeElement, List<VariableElement>> annotatedFieldsMap,
             Map<TypeElement, List<MethodSpec>> customSQLQueriesMap,
-            Map<TypeElement, MethodSpec> fuzzySearchMethods) {
+            Map<TypeElement, MethodSpec> freeTextSearchMethods) {
 
         String className = entity.getQualifiedName().toString();
         int lastDot = className.lastIndexOf('.');
@@ -55,8 +55,8 @@ public class DaoFactory {
             annotatedFields.forEach(annotatedField -> handleAnnotatedField(entity, builder, annotatedField));
         if(customSQLQueriesMap.get(entity) != null)
             customSQLQueriesMap.get(entity).forEach(builder::addMethod);
-        if(fuzzySearchMethods.get(entity) != null)
-            builder.addMethod(fuzzySearchMethods.get(entity));
+        if(freeTextSearchMethods.get(entity) != null)
+            builder.addMethod(freeTextSearchMethods.get(entity));
         StaticUtils.writeToJavaFile(entity.getSimpleName().toString(), packageName, builder, processingEnv, "JpaRepository");
     }
     private void handleAnnotatedField(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {

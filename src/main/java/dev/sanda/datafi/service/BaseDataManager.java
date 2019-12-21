@@ -372,17 +372,17 @@ public abstract class BaseDataManager<T> {
     }
 
     //implicit / default pagination
-    public List<T> fuzzySearchBy(String searchTerm){
-        return fuzzySearchBy(searchTerm, 0, 50);
+    public List<T> freeTextSearchBy(String searchTerm){
+        return freeTextSearchBy(searchTerm, 0, 50);
     }
 
     //explicit pagination
-    public List<T> fuzzySearchBy(String searchTerm, int offset, int limit){
-        return fuzzySearchBy(searchTerm, offset, limit, null, null);
+    public List<T> freeTextSearchBy(String searchTerm, int offset, int limit){
+        return freeTextSearchBy(searchTerm, offset, limit, null, null);
     }
 
     //explicit pagination with sort
-    public List<T> fuzzySearchBy(String searchTerm, int offset, int limit, String sortBy, Sort.Direction sortDirection){
+    public List<T> freeTextSearchBy(String searchTerm, int offset, int limit, String sortBy, Sort.Direction sortDirection){
         try{
             if(searchTerm.equals(""))
                 throw new IllegalArgumentException(
@@ -391,7 +391,7 @@ public abstract class BaseDataManager<T> {
             StaticUtils.validateSortByIfNonNull(clazz, sortBy, reflectionCache);
             Pageable paginator = StaticUtils.generatePageRequest(offset, limit, sortBy, sortDirection);
             Method methodToInvoke =
-                    getMethodToInvoke("fuzzySearch", new Class<?>[]{String.class, Pageable.class}, dao);
+                    getMethodToInvoke("freeTextSearch", new Class<?>[]{String.class, Pageable.class}, dao);
             Page<T> result = (Page<T>) methodToInvoke.invoke(dao, searchTerm, paginator);
             return result.getContent();
         }catch (Exception e){

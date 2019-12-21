@@ -31,7 +31,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         Set<? extends TypeElement> entities = getPersistableEntities(roundEnvironment);
         if(entities.isEmpty()) return false;
         val customSqlQueriesMap = new CustomSQLQueryFactory(processingEnv).constructCustomQueries(entities);
-        val searchMethodsMap = new FuzzySearchMethodsFactory(processingEnv).resolveFuzzySearchMethods(entities);
+        val searchMethodsMap = new FreeTextSearchMethodsFactory(processingEnv).resolveFreeTextSearchMethods(entities);
         Map<TypeElement, List<VariableElement>> annotatedFieldsMap =
                 new FindByFieldsResolver(processingEnv).annotatedFieldsMap(entities);
         //generate a custom jpa repository for each entity

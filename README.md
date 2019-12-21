@@ -309,15 +309,15 @@ Observe the following example:
 ##### Domain model  
 ```  
 @Entity
-//@FuzzySearchByFields({"name", "email"}) - this is equivalent to the field level annotations below
+//@FreeTextSearchByFields({"name", "email"}) - this is equivalent to the field level annotations below
 public class Person{  
 
      @Id 
      private String id = UUID.randomUUID().toString(); 
      
-     @FuzzySearchBy
+     @FreeTextSearchBy
      private String name;
-	 @FuzzySearchBy
+	 @FreeTextSearchBy
 	 private String email;
     //...
 }  
@@ -330,13 +330,13 @@ public class PersonService{
      @Autowired 
      private DataManager<Person> personDataManager; 
      
-     public List<Person> fuzzySearchPeople(String searchTerm){ 
-        return personDataManager.fuzzySearch(searchTerm); 
+     public List<Person> freeTextSearchPeople(String searchTerm){ 
+        return personDataManager.freeTextSearch(searchTerm); 
      } 
 }  
 
 ```
-`fuzzySearch` does not return a list of all matching database records, but rather the contents of a `Page` object. This means that the search results are paginated by definition. Because of this, `fuzzySearch` takes in the 2 optional arguments `int offset` and `int limit` - in that order. These are "optional" in the sense that if not specified, the offset and limit will default to 0 and 50 respectively. An additional 2 optional arguments are `String sortBy` and `Sort.Direction sortDirection` - in that order. `String sortBy` specifies the name of a field within the given entity by which to apply the sort. If no matching field is found an `IllegalArgumentException` is thrown. `Sort.Direction sortDirection` determines the ordering strategy. If not specified it defaults to ascending order (`ASC`).
+`freeTextSearch` does not return a list of all matching database records, but rather the contents of a `Page` object. This means that the search results are paginated by definition. Because of this, `freeTextSearch` takes in the 2 optional arguments `int offset` and `int limit` - in that order. These are "optional" in the sense that if not specified, the offset and limit will default to 0 and 50 respectively. An additional 2 optional arguments are `String sortBy` and `Sort.Direction sortDirection` - in that order. `String sortBy` specifies the name of a field within the given entity by which to apply the sort. If no matching field is found an `IllegalArgumentException` is thrown. `Sort.Direction sortDirection` determines the ordering strategy. If not specified it defaults to ascending order (`ASC`).
 
 
 
