@@ -59,7 +59,7 @@ public class CustomSQLQueryFactory {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(queryAnnotationBuilder.build())
                 .addParameters(query.parameterSpecs())
-                .returns(query.returnTypeName())
+                .returns(query.returnSignature())
                 .build();
     }
 
@@ -126,7 +126,7 @@ public class CustomSQLQueryFactory {
         customSQLQuery.setName(formatAndValidateName(name));
         String sqlString = parseSqlString(sql, customSQLQuery.getArgs(), entity);
         customSQLQuery.setSql(sqlString);
-        customSQLQuery.setReturnSignature(determineSQLReturnSignature(sqlString));
+        customSQLQuery.setReturnPlurality(determineSQLReturnSignature(sqlString));
         return customSQLQuery;
     }
 
@@ -236,13 +236,15 @@ public class CustomSQLQueryFactory {
     }
 
     private String formatAndValidateName(String name) {
-        String trimmedName = name.trim();
-        if(trimmedName.endsWith(".sql"))
-            trimmedName = trimmedName.substring(0, trimmedName.indexOf(".sql"));
-        if(!isValidJavaIdentifier(trimmedName)){
-            compilationFailureWithMessage(invalidNameMessage(trimmedName), env);
+        if(name.contains("/"))
+            name = name.substring(name.lastIndexOf("/") + 1);
+        name = name.trim();
+        if(name.endsWith(".sql"))
+            name = name.substring(0, name.indexOf(".sql"));
+        if(!isValidJavaIdentifier(name)){
+            compilationFailureWithMessage(invalidNameMessage(name), env);
         }
-        return trimmedName;
+        return name;
     }
 
     private static void compilationFailureWithMessage(String message, ProcessingEnvironment env) {
