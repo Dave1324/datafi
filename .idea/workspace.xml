@@ -3,13 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/StaticUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/StaticUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/AnnotationProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/AnnotationProcessor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DataManagerFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DataManagerFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/Archivable.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/ArchivableDataManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/BaseDataManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,7 +147,7 @@
       <workItem from="1569501220961" duration="1542000" />
       <workItem from="1576734184924" duration="1211000" />
       <workItem from="1576783296564" duration="14924000" />
-      <workItem from="1576957359047" duration="3729000" />
+      <workItem from="1576957359047" duration="6710000" />
     </task>
     <servers />
   </component>
@@ -189,46 +184,46 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="726" y="301" width="524" height="502" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1576960302178" />
-    <state x="751" y="256" key="#xdebugger.evaluate" timestamp="1576959253612">
+    <state x="751" y="256" key="#xdebugger.evaluate" timestamp="1577220695956">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state x="751" y="256" key="#xdebugger.evaluate/67.27.1853.1053@67.27.1853.1053" timestamp="1576959253612" />
+    <state x="751" y="256" key="#xdebugger.evaluate/67.27.1853.1053@67.27.1853.1053" timestamp="1577220695956" />
     <state x="771" y="295" width="424" height="513" key="FileChooserDialogImpl" timestamp="1576953847251">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="771" y="295" width="424" height="513" key="FileChooserDialogImpl/67.27.1853.1053@67.27.1853.1053" timestamp="1576953847251" />
-    <state width="1807" height="181" key="GridCell.Tab.0.bottom" timestamp="1576959431151">
+    <state width="1807" height="181" key="GridCell.Tab.0.bottom" timestamp="1577220674415">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1576959431151" />
-    <state width="1807" height="181" key="GridCell.Tab.0.center" timestamp="1576959431150">
+    <state width="1807" height="181" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1577220674415" />
+    <state width="1807" height="181" key="GridCell.Tab.0.center" timestamp="1577220674412">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1576959431150" />
-    <state width="1807" height="181" key="GridCell.Tab.0.left" timestamp="1576959431149">
+    <state width="1807" height="181" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1577220674412" />
+    <state width="1807" height="181" key="GridCell.Tab.0.left" timestamp="1577220674403">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1576959431149" />
-    <state width="1807" height="181" key="GridCell.Tab.0.right" timestamp="1576959431150">
+    <state width="1807" height="181" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1577220674403" />
+    <state width="1807" height="181" key="GridCell.Tab.0.right" timestamp="1577220674414">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1576959431150" />
-    <state width="1807" height="181" key="GridCell.Tab.1.bottom" timestamp="1576959431152">
+    <state width="1807" height="181" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1577220674414" />
+    <state width="1807" height="181" key="GridCell.Tab.1.bottom" timestamp="1577220680584">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.1.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1576959431152" />
-    <state width="1807" height="181" key="GridCell.Tab.1.center" timestamp="1576959431151">
+    <state width="1807" height="181" key="GridCell.Tab.1.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1577220680584" />
+    <state width="1807" height="181" key="GridCell.Tab.1.center" timestamp="1577220680583">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.1.center/67.27.1853.1053@67.27.1853.1053" timestamp="1576959431151" />
-    <state width="1807" height="181" key="GridCell.Tab.1.left" timestamp="1576959431151">
+    <state width="1807" height="181" key="GridCell.Tab.1.center/67.27.1853.1053@67.27.1853.1053" timestamp="1577220680583" />
+    <state width="1807" height="181" key="GridCell.Tab.1.left" timestamp="1577220680583">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.1.left/67.27.1853.1053@67.27.1853.1053" timestamp="1576959431151" />
-    <state width="1807" height="181" key="GridCell.Tab.1.right" timestamp="1576959431152">
+    <state width="1807" height="181" key="GridCell.Tab.1.left/67.27.1853.1053@67.27.1853.1053" timestamp="1577220680583" />
+    <state width="1807" height="181" key="GridCell.Tab.1.right" timestamp="1577220680583">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.1.right/67.27.1853.1053@67.27.1853.1053" timestamp="1576959431152" />
+    <state width="1807" height="181" key="GridCell.Tab.1.right/67.27.1853.1053@67.27.1853.1053" timestamp="1577220680583" />
     <state x="592" y="359" width="792" height="386" key="RefactorX.RenameTag" timestamp="1576954107992">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -249,5 +244,16 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="689" y="171" width="598" height="762" key="refactoring.ChangeSignatureDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1576789813511" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java</url>
+          <line>39</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
