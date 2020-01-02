@@ -7,7 +7,6 @@ Datafi auto-generates the data access layer for Spring-Data-Jpa applications.
  - Get all the features of Jpa for your entire data model, without writing a single line of data layer code.  
 # Table of Contents  
 + [Installation](#installation)
-+ [Requirements](#requirements)
 + [Hello World](#hello-world)
 	- [Domain model](#domain-model)
 	- [Service layer](#service-layer)
@@ -44,14 +43,11 @@ Datafi is available on [maven central](https://search.maven.org/artifact/org.sin
 
 ```
 <dependency>
-    <groupId>org.sindaryn</groupId>
+    <groupId>dev.sanda</groupId>
         <artifactId>datafi</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency>
 ```
-
-### Requirements
-1. All entities **must** have a public `getId()` method.
 
 ### Hello World  
 Datafi autogenerates Jpa repositories for all data model entities annotated with `@Entity` and / or `@Table` annotation(s).  
@@ -60,14 +56,13 @@ To make use of this, `@Autowire` the `DataManager<T>` bean into your code, as fo
 #### Domain model  
 ```  
   
-@Entity  
-@PersistableEntity  
+@Entity
 public class Person{  
      @Id 
-     private String id = UUID.randomUUID().toString(); 
+     @GeneratedValue
+     private Long id; 
      private String name; 
      private Integer age; 
-     // getters & setters, etc...
 }  
 ```  
 #### Service layer  
@@ -114,60 +109,55 @@ public class Person{
 ### Archivability
 
 ##### Overview
-Sometimes when it comes to removing records from a database, the choice is made to mark the relevant records as archived, as oppposed to actually deleting them from the database. Datafi supports this out of the box with the `Archivable` interface and `ArchivableDataManager<T extends Archivable>` bean. The `Archivable` interface requires both a getter and setter for a `Boolean isArchived` field. Once the interface has been implemented by an entity, the `ArchivableDataManager<T extends Archivable>` bean can be autowired for that entity. `ArchivableDataManager<T extends Archivable>` extends the functionality of `DataManager<T>` with the following four methods:
+Sometimes when it comes to removing records from a database, the choice is made to mark the relevant records as archived, as oppposed to actually deleting them from the database. Datafi `DataManager<T>` supports this out of the box with the following four methods:
 1. `public T archive(T input)`: Finds the `input` record by id, and marks it as archived.
 2. `public T deArchive(T input)`: The opposite of 1.
 3. `public List<T> archiveCollection(Collection<T> input)`: 1 in plural.
 4. `public List<T> deArchiveCollection(Collection<T> input)`: 2 in plural.
+
+__Important__: In order to make use of this feature for a given entity, it _must_ have a `boolean isArchived` member field.
 
 Observe the following example:
 
 ##### Domain model  
 ```  
 @Entity
-public class Person implements Archivable{  
+public class Person{  
      @Id 
-     private String id = UUID.randomUUID().toString(); 
-	 private Boolean isArchived = false; //use Boolean, not boolean
-	 @Override
-	 public Boolean getIsArchived(){
-	 		return this.isArchived;
-		}
-	 @Override
-	 public Boolean setIsArchived(Boolean isArchived){
-	 		this.isArchived = isArchived;
-		}
+     @GeneratedValue
+     private Long id; 
+     private Boolean isArchived = false;
      //...
 }  
 ```  
-**_Side note:_** _In practice, manual coding of getters and setters is unnecessary, [lombok](https://projectlombok.org/)  can be used to auto generate them._
+
 ##### Example Service Layer  
 ```  
 @Service  
 public class PersonService{  
 
      @Autowired 
-     private ArchivableDataManager<Person> archivablePersonDataManager; 
+     private DataManager<Person> personDataManager; 
 	 
 	 public Person archivePerson(Person toArchive){
-	 	return archivablePersonDataManager.archive(toArchive);
+	 	return personDataManager.archive(toArchive);
 	 }
 	 
 	 public Person deArchivePerson(Person toDeArchive){
-	 	return archivablePersonDataManager.deArchive(toDeArchive);
+	 	return personDataManager.deArchive(toDeArchive);
 	 }
 	 
 	  public List<Person> archivePersons(List<Person> toArchive){
-	 	return archivablePersonDataManager.archiveCollection(toArchive);
+	 	return personDataManager.archiveCollection(toArchive);
 	 }
 	 
 	 public List<Person> deArchivePersons(List<Person> toDeArchive){
-	 	return archivablePersonDataManager.deArchiveCollection(toDeArchive);
+	 	return personDataManager.deArchiveCollection(toDeArchive);
 	 }
 }  
 ```
 
-### Custom resolvers  
+### Custom Queries  
   
 #### @GetBy, and @GetAllBy  
 In addition to the standard JpaRepository methods included by default, you can annotate any field with `@GetBy` and / or `@GetAllBy` annotation, and this will generate a corresponding `findBy...(value)`, or `findAllBy...In(List<...> values)`. For example:  
