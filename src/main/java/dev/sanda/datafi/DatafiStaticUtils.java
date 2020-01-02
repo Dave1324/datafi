@@ -5,7 +5,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import dev.sanda.datafi.reflection.CachedEntityType;
+import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.ReflectionCache;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class StaticUtils {
+public class DatafiStaticUtils {
     public static String toPascalCase(String string){
         return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
@@ -69,15 +69,14 @@ public class StaticUtils {
             e.printStackTrace();
         }
     }
-    public static <T> Object getId(T input, ReflectionCache reflectionCache) {
-        return reflectionCache.getEntitiesCache().get(input.getClass().getSimpleName()).invokeGetter(input, "id");
-    }
     public static void throwEntityNotFoundException(String simpleName, Object id){
         throw new RuntimeException("Cannot find " + simpleName + " by id: " + id);
     }
     public static<T> List<Object> getIdList(Collection<T> input, ReflectionCache reflectionCache) {
+        final String clazzName = input.iterator().next().getClass().getSimpleName();
+        final CachedEntityTypeInfo cachedEntityTypeInfo = reflectionCache.getEntitiesCache().get(clazzName);
         List<Object> ids = new ArrayList<>();
-        input.forEach(item -> ids.add(getId(item, reflectionCache)));
+        input.forEach(item -> ids.add(cachedEntityTypeInfo.getId(item)));
         return ids;
     }
 
@@ -93,7 +92,7 @@ public class StaticUtils {
 
     public static void validateSortByIfNonNull(Class<?> clazz, String sortByFieldName, ReflectionCache reflectionCache){
         if(sortByFieldName == null) return;
-        CachedEntityType entityTypeInfo = reflectionCache.getEntitiesCache().get(clazz.getSimpleName());
+        CachedEntityTypeInfo entityTypeInfo = reflectionCache.getEntitiesCache().get(clazz.getSimpleName());
         if(entityTypeInfo.getFields().get(sortByFieldName) == null)
             throw new IllegalArgumentException(
                     "Cannot sort by "+ sortByFieldName +" as there is no such field in " + clazz.getName());

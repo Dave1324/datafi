@@ -1,7 +1,7 @@
 package dev.sanda.datafi.code_generator.query;
 
 import com.squareup.javapoet.*;
-import dev.sanda.datafi.StaticUtils;
+import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.annotations.query.WithNativeQuery;
 import dev.sanda.datafi.annotations.query.WithNativeQueryScripts;
 import dev.sanda.datafi.annotations.query.WithQuery;
@@ -37,7 +37,7 @@ public class CustomSQLQueryFactory {
     private Map<TypeElement, Map<String, TypeName>> entitiesFields;
 
     public Map<TypeElement, List<MethodSpec>> constructCustomQueries(Set<? extends TypeElement> entities) {
-        entitiesFields = StaticUtils.getEntitiesFieldsMap(entities);
+        entitiesFields = DatafiStaticUtils.getEntitiesFieldsMap(entities);
         Map<TypeElement, List<MethodSpec>> customQueriesMap = new HashMap<>();
         for (TypeElement entity : entities) {
             List<CustomSQLQuery> customQueries = getCustomSQLQueries(entity);
