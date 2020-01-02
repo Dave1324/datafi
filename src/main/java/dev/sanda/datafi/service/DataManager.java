@@ -243,7 +243,7 @@ public class DataManager<T> {
         return (T) cascadedUpdateImpl(toUpdate, source);
     }
 
-    public<HasTs> List<T> addNewToCollectionIn(HasTs toAddTo, String fieldName, List<T> toAdd){
+    public<HasTs> List<T> createAndAddNewToCollectionIn(HasTs toAddTo, String fieldName, List<T> toAdd){
 
         GenericDao toAddDao = dao;
         final String toAddToName = toAddTo.getClass().getSimpleName();
@@ -262,7 +262,7 @@ public class DataManager<T> {
         return toAdd;
     }
 
-    public<HasTs> List<T> attachExistingToCollectionIn(HasTs toAddTo, String fieldName, List<T> toAttach){
+    public<HasTs> List<T> associateExistingWithCollectionIn(HasTs toAddTo, String fieldName, List<T> toAttach){
 
         GenericDao toAttachDao = dao;
         final String toAttachToName = toAddTo.getClass().getSimpleName();
