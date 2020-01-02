@@ -91,27 +91,34 @@ public class CustomSQLQueryFactory {
 
         if(nativeQueryScripts != null){
             for (String scriptPath : nativeQueryScripts.value()) {
-                customSQLQueries.add(parseNativeQueryScript(scriptPath, entity));
+                customSQLQueries.add(parseQueryScript(scriptPath, entity));
             }
         }
         return customSQLQueries;
     }
 
-    private CustomSQLQuery parseNativeQueryScript(String path, TypeElement entity) {
-        CustomSQLQuery customSQLQuery = parseQueryScript(path, entity);
-        customSQLQuery.setNative(true);
-        return customSQLQuery;
-    }
-
     private CustomSQLQuery parseQueryScript(String path, TypeElement entity) {
-        path = path.endsWith(".sql") ? path : path + ".sql";
         //get file
-        final ClassPathResource resource = new ClassPathResource("/sql/" + path);
+        final ClassPathResource resource = new ClassPathResource(path);
         //validate and assign filename as query name
         String name = formatAndValidateName(Objects.requireNonNull(resource.getFilename()));
         //read sql string from file
         String sql = sqlResourceToString(resource.getPath());
-        return parseQuery(name, sql, entity);
+        //set nativeQuery flag
+        boolean nativeQuery = determineIfIsNativeQuery(path);
+        //set isNativeQuery
+        var result = parseQuery(name, sql, entity);
+        result.setNative(nativeQuery);
+        return result;
+    }
+
+    private boolean determineIfIsNativeQuery(String path) {
+        if(path.endsWith(".sql")) return true;
+        if(path.endsWith(".jpql")) return false;
+        else {
+            compilationFailureWithMessage(String.format("Invalid query script path: %s; Paths must end with either a .sql or a .jpql suffix", path), env);
+            return false;
+        }
     }
 
     private CustomSQLQuery parseIndividualNativeQuery(String name, String sql, TypeElement entity) {
@@ -239,8 +246,8 @@ public class CustomSQLQueryFactory {
         if(name.contains("/"))
             name = name.substring(name.lastIndexOf("/") + 1);
         name = name.trim();
-        if(name.endsWith(".sql"))
-            name = name.substring(0, name.indexOf(".sql"));
+        if(name.endsWith(".sql")) name = name.substring(0, name.indexOf(".sql"));
+        if(name.endsWith(".jpql")) name = name.substring(0, name.indexOf(".jpql"));
         if(!isValidJavaIdentifier(name)){
             compilationFailureWithMessage(invalidNameMessage(name), env);
         }
