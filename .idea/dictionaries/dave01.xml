@@ -2,6 +2,7 @@
   <dictionary name="dave01">
     <words>
       <w>archivable</w>
+      <w>jpql</w>
       <w>persistable</w>
       <w>sindaryn</w>
       <w>updatable</w>

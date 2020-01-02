@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/dave01.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/dave01.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -192,38 +192,38 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="771" y="295" width="424" height="513" key="FileChooserDialogImpl/67.27.1853.1053@67.27.1853.1053" timestamp="1576953847251" />
-    <state width="1807" height="181" key="GridCell.Tab.0.bottom" timestamp="1577220674415">
+    <state width="1807" height="181" key="GridCell.Tab.0.bottom" timestamp="1577994287142">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1577220674415" />
-    <state width="1807" height="181" key="GridCell.Tab.0.center" timestamp="1577220674412">
+    <state width="1807" height="181" key="GridCell.Tab.0.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1577994287142" />
+    <state width="1807" height="181" key="GridCell.Tab.0.center" timestamp="1577994287137">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1577220674412" />
-    <state width="1807" height="181" key="GridCell.Tab.0.left" timestamp="1577220674403">
+    <state width="1807" height="181" key="GridCell.Tab.0.center/67.27.1853.1053@67.27.1853.1053" timestamp="1577994287137" />
+    <state width="1807" height="181" key="GridCell.Tab.0.left" timestamp="1577994287134">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1577220674403" />
-    <state width="1807" height="181" key="GridCell.Tab.0.right" timestamp="1577220674414">
+    <state width="1807" height="181" key="GridCell.Tab.0.left/67.27.1853.1053@67.27.1853.1053" timestamp="1577994287134" />
+    <state width="1807" height="181" key="GridCell.Tab.0.right" timestamp="1577994287140">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1577220674414" />
-    <state width="1807" height="181" key="GridCell.Tab.1.bottom" timestamp="1577220680584">
+    <state width="1807" height="181" key="GridCell.Tab.0.right/67.27.1853.1053@67.27.1853.1053" timestamp="1577994287140" />
+    <state width="1807" height="181" key="GridCell.Tab.1.bottom" timestamp="1577994286918">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.1.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1577220680584" />
-    <state width="1807" height="181" key="GridCell.Tab.1.center" timestamp="1577220680583">
+    <state width="1807" height="181" key="GridCell.Tab.1.bottom/67.27.1853.1053@67.27.1853.1053" timestamp="1577994286918" />
+    <state width="1807" height="181" key="GridCell.Tab.1.center" timestamp="1577994286918">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.1.center/67.27.1853.1053@67.27.1853.1053" timestamp="1577220680583" />
-    <state width="1807" height="181" key="GridCell.Tab.1.left" timestamp="1577220680583">
+    <state width="1807" height="181" key="GridCell.Tab.1.center/67.27.1853.1053@67.27.1853.1053" timestamp="1577994286918" />
+    <state width="1807" height="181" key="GridCell.Tab.1.left" timestamp="1577994286917">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.1.left/67.27.1853.1053@67.27.1853.1053" timestamp="1577220680583" />
-    <state width="1807" height="181" key="GridCell.Tab.1.right" timestamp="1577220680583">
+    <state width="1807" height="181" key="GridCell.Tab.1.left/67.27.1853.1053@67.27.1853.1053" timestamp="1577994286917" />
+    <state width="1807" height="181" key="GridCell.Tab.1.right" timestamp="1577994286918">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
-    <state width="1807" height="181" key="GridCell.Tab.1.right/67.27.1853.1053@67.27.1853.1053" timestamp="1577220680583" />
+    <state width="1807" height="181" key="GridCell.Tab.1.right/67.27.1853.1053@67.27.1853.1053" timestamp="1577994286918" />
     <state x="592" y="359" width="792" height="386" key="RefactorX.RenameTag" timestamp="1576954107992">
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
@@ -249,9 +249,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java</url>
-          <line>39</line>
-          <option name="timeStamp" value="18" />
+          <url>file://$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java</url>
+          <line>109</line>
+          <option name="timeStamp" value="20" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
