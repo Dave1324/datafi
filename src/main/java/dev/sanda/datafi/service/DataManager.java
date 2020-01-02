@@ -1,8 +1,9 @@
 package dev.sanda.datafi.service;
 
-import dev.sanda.datafi.StaticUtils;
+import dev.sanda.datafi.DatafiStaticUtils;
+import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.persistence.GenericDao;
-import dev.sanda.datafi.reflection.CachedEntityType;
+import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.ReflectionCache;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -34,6 +35,7 @@ public class DataManager<T> {
     @NonNull
     private Class<T> clazz;
     private String clazzSimpleName;
+    private CachedEntityTypeInfo cachedEntityTypeInfo;
     @Autowired
     protected ReflectionCache reflectionCache;
     /**
@@ -52,6 +54,7 @@ public class DataManager<T> {
         this.clazz = type;
         this.clazzSimpleName = type.getSimpleName();
         dao = daoMap.get(clazzSimpleName);
+        cachedEntityTypeInfo = reflectionCache.getEntitiesCache().get(clazzSimpleName);
     }
 
     @PostConstruct
@@ -175,7 +178,7 @@ public class DataManager<T> {
     public List<T> getBy(String attributeName, Object attributeValue){
         try{
             Class<?>[] params = new Class<?>[]{attributeValue.getClass()};
-            String resolverName = "findBy" + StaticUtils.toPascalCase(attributeName);
+            String resolverName = "findBy" + DatafiStaticUtils.toPascalCase(attributeName);
             Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
             return (List<T>) methodToInvoke.invoke(dao, new Object[]{attributeValue});
         }catch (Exception e){
@@ -186,7 +189,7 @@ public class DataManager<T> {
     public Optional<T> getByUnique(String attributeName, Object attributeValue){
         try{
             Class<?>[] params = new Class<?>[]{attributeValue.getClass()};
-            String resolverName = "findBy" + StaticUtils.toPascalCase(attributeName);
+            String resolverName = "findBy" + DatafiStaticUtils.toPascalCase(attributeName);
             Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
             return (Optional<T>) methodToInvoke.invoke(dao, new Object[]{attributeValue});
         }catch (Exception e){
@@ -197,7 +200,7 @@ public class DataManager<T> {
     public List<T> getAllBy(String attributeName, Object[] attributeValues){
         try{
             Class<?>[] params = new Class<?>[]{List.class};
-            String resolverName = "findAllBy" + StaticUtils.toPascalCase(attributeName) + "In";
+            String resolverName = "findAllBy" + DatafiStaticUtils.toPascalCase(attributeName) + "In";
             Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
             return (List<T>) methodToInvoke.invoke(dao, Arrays.asList(attributeValues));
         }catch (Exception e){
@@ -248,10 +251,10 @@ public class DataManager<T> {
 
         toAddTo = (HasTs) toAddToDao.findById(reflectionCache.getEntitiesCache().get(toAddToName).invokeGetter(toAddTo, "id")).orElse(null);
         if(toAddTo == null) throw new IllegalArgumentException("Could not find an entity with the given id");
-        Method existingCollectionGetter = getMethodToInvoke("get" + StaticUtils.toPascalCase(fieldName) ,toAddTo);
+        Method existingCollectionGetter = getMethodToInvoke("get" + DatafiStaticUtils.toPascalCase(fieldName) ,toAddTo);
         Collection<T> existingCollection = (Collection<T>) invoke(existingCollectionGetter, toAddTo);
         existingCollection.addAll(toAdd);
-        Method existingCollectionSetter = getMethodToInvoke("set" + StaticUtils.toPascalCase(fieldName) ,toAddTo);
+        Method existingCollectionSetter = getMethodToInvoke("set" + DatafiStaticUtils.toPascalCase(fieldName) ,toAddTo);
         invoke(existingCollectionSetter, toAddTo, existingCollection);
 
         toAddToDao.save(toAddTo);
@@ -268,10 +271,10 @@ public class DataManager<T> {
         toAttach = toAttachDao.findAllById(idList(toAttach));
         toAddTo = (HasTs) toAttachToDao.findById(reflectionCache.getEntitiesCache().get(toAttachToName).invokeGetter(toAddTo, "id")).orElse(null);
         if(toAddTo == null) throw new IllegalArgumentException("Could not find an entity with the given id");
-        Method existingCollectionGetter = getMethodToInvoke("get" + StaticUtils.toPascalCase(fieldName) ,toAddTo);
+        Method existingCollectionGetter = getMethodToInvoke("get" + DatafiStaticUtils.toPascalCase(fieldName) ,toAddTo);
         Collection<T> existingCollection = (Collection<T>) invoke(existingCollectionGetter, toAddTo);
         existingCollection.addAll(toAttach);
-        Method existingCollectionSetter = getMethodToInvoke("set" + StaticUtils.toPascalCase(fieldName) ,toAddTo);
+        Method existingCollectionSetter = getMethodToInvoke("set" + DatafiStaticUtils.toPascalCase(fieldName) ,toAddTo);
         invoke(existingCollectionSetter, toAddTo, existingCollection);
         toAttachToDao.save(toAddTo);
         return toAttach;
@@ -365,7 +368,7 @@ public class DataManager<T> {
     }
 
     public List<Object> idList(Iterable<T> collection) {
-        CachedEntityType entityType = reflectionCache.getEntitiesCache().get(clazzSimpleName);
+        CachedEntityTypeInfo entityType = reflectionCache.getEntitiesCache().get(clazzSimpleName);
         List<Object> ids = new ArrayList<>();
         collection.forEach(item -> ids.add(entityType.invokeGetter(item, "id")));
         return ids;
@@ -386,10 +389,10 @@ public class DataManager<T> {
         try{
             if(searchTerm.equals(""))
                 throw new IllegalArgumentException(
-                        "Illegal attempt to search for " + StaticUtils.toPlural(clazzSimpleName) + " with blank string"
+                        "Illegal attempt to search for " + DatafiStaticUtils.toPlural(clazzSimpleName) + " with blank string"
                 );
-            StaticUtils.validateSortByIfNonNull(clazz, sortBy, reflectionCache);
-            Pageable paginator = StaticUtils.generatePageRequest(offset, limit, sortBy, sortDirection);
+            DatafiStaticUtils.validateSortByIfNonNull(clazz, sortBy, reflectionCache);
+            Pageable paginator = DatafiStaticUtils.generatePageRequest(offset, limit, sortBy, sortDirection);
             Method methodToInvoke =
                     getMethodToInvoke("freeTextSearch", new Class<?>[]{String.class, Pageable.class}, dao);
             Page<T> result = (Page<T>) methodToInvoke.invoke(dao, searchTerm, paginator);
@@ -399,36 +402,32 @@ public class DataManager<T> {
         }
     }
 
-    public T archive(T input) {
-        Object id = StaticUtils.getId(input, reflectionCache);
+    public <A extends Archivable> A archive(A input) {
+        Object id = cachedEntityTypeInfo.getId(input);
         final String simpleName = input.getClass().getSimpleName();
         T toArchive = findById(id).orElse(null);
-        if(toArchive == null) StaticUtils.throwEntityNotFoundException(simpleName, id);
-        reflectionCache.getEntitiesCache().get(simpleName).setIsArchived(toArchive, true);
-        return save(toArchive);
+        if(toArchive == null) DatafiStaticUtils.throwEntityNotFoundException(simpleName, id);
+        ((A)toArchive).setIsArchived(true);
+        return (A) save(toArchive);
     }
-    public T deArchive(T input) {
-        Object id = StaticUtils.getId(input, reflectionCache);
+    public <A extends Archivable> A deArchive(A input) {
+        Object id = cachedEntityTypeInfo.getId(input);
         final String simpleName = input.getClass().getSimpleName();
         T toDeArchive = findById(id).orElse(null);
-        if(toDeArchive == null) StaticUtils.throwEntityNotFoundException(simpleName, id);
-        reflectionCache.getEntitiesCache().get(simpleName).setIsArchived(toDeArchive, false);
-        return save(toDeArchive);
+        if(toDeArchive == null) DatafiStaticUtils.throwEntityNotFoundException(simpleName, id);
+        ((A)toDeArchive).setIsArchived(false);
+        return (A) save(toDeArchive);
     }
-    public List<T> archiveCollection(Collection<T> input) {
-        final Class<T> clazz = (Class<T>) input.iterator().next().getClass();
-        val cachedEntityType = reflectionCache.getEntitiesCache().get(clazz.getSimpleName());
-        List<Object> ids = StaticUtils.getIdList(input, reflectionCache);
+    public <A extends Archivable> List<A> archiveCollection(Collection<A> input) {
+        List<Object> ids = DatafiStaticUtils.getIdList(input, reflectionCache);
         List<T> toArchive = findAllById(ids);
-        toArchive.forEach(item -> cachedEntityType.setIsArchived(item, true));
-        return saveAll(toArchive);
+        toArchive.forEach(item -> ((A)item).setIsArchived(true));
+        return (List<A>) saveAll(toArchive);
     }
-    public List<T> deArchiveCollection(Collection<T> input) {
-        List<Object> ids = StaticUtils.getIdList(input, reflectionCache);
-        val cachedEntityType = reflectionCache.getEntitiesCache().get(clazz.getSimpleName());
+    public <A extends Archivable> List<A> deArchiveCollection(Collection<A> input) {
+        List<Object> ids = DatafiStaticUtils.getIdList(input, reflectionCache);
         List<T> toDeArchive = findAllById(ids);
-        toDeArchive.forEach(item -> cachedEntityType.setIsArchived(item, false));
-        return saveAll(toDeArchive);
+        toDeArchive.forEach(item -> ((A)item).setIsArchived(false));
+        return (List<A>) saveAll(toDeArchive);
     }
-
 }

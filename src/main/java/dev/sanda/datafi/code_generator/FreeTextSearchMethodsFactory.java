@@ -1,7 +1,7 @@
 package dev.sanda.datafi.code_generator;
 
 import com.squareup.javapoet.*;
-import dev.sanda.datafi.StaticUtils;
+import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.annotations.free_text_search.FreeTextSearchBy;
 import dev.sanda.datafi.annotations.free_text_search.FreeTextSearchByFields;
 import lombok.Data;
@@ -79,7 +79,7 @@ public class FreeTextSearchMethodsFactory {
                 (enclosedElement.getAnnotation(FreeTextSearchBy.class) != null ||
                         classLevelSearchByFieldNames.contains(enclosedElement.getSimpleName().toString()));
         if(isDeclaredAsSearchBy && !"java.lang.String".equals(enclosedElement.asType().toString())){
-            StaticUtils.logCompilationError(processingEnv, enclosedElement,
+            DatafiStaticUtils.logCompilationError(processingEnv, enclosedElement,
                     "field " + enclosedElement.asType().toString() + " " +
                             enclosedElement.getSimpleName().toString() + " is marked as free text search parameter" +
                             " but is not of type java.lang.String");
@@ -89,7 +89,7 @@ public class FreeTextSearchMethodsFactory {
     }
 
     private String freeTextSearchQuery(String entityName, List<VariableElement> searchFields) {
-        String placeHolder = StaticUtils.firstLowerCaseLetterOf(entityName);
+        String placeHolder = DatafiStaticUtils.firstLowerCaseLetterOf(entityName);
         StringBuilder result = new StringBuilder("SELECT " + placeHolder + " FROM " + entityName + " " + placeHolder);
         boolean isFirst = true;
         for (VariableElement field : searchFields) {

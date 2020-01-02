@@ -21,7 +21,7 @@ public class ReflectionCache {
 
     private Reflections reflections;
     @Getter
-    private Map<String, CachedEntityType> entitiesCache;
+    private Map<String, CachedEntityTypeInfo> entitiesCache;
     @Getter
     private Map<Map.Entry<String, Class<?>[]>, Method> resolversCache;
 
@@ -37,7 +37,7 @@ public class ReflectionCache {
             if (isPersistableEntity(currentType))
                 entitiesCache.put(
                         currentType.getSimpleName(),
-                        new CachedEntityType(
+                        new CachedEntityTypeInfo(
                                 currentType,
                                 getClassFields(currentType),
                                 getPublicMethodsOf(currentType)));

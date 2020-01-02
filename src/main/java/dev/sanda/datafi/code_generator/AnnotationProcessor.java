@@ -4,7 +4,7 @@ package dev.sanda.datafi.code_generator;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeSpec;
-import dev.sanda.datafi.StaticUtils;
+import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.code_generator.query.CustomSQLQueryFactory;
 import lombok.val;
 import org.springframework.context.annotation.ComponentScan;
@@ -36,7 +36,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 new FindByFieldsResolver(processingEnv).annotatedFieldsMap(entities);
         //generate a custom jpa repository for each entity
         DaoFactory daoFactory = new DaoFactory(processingEnv);
-        DataManagerFactory dataManagerFactory = new DataManagerFactory(processingEnv, StaticUtils.getBasePackage(roundEnvironment));
+        DataManagerFactory dataManagerFactory = new DataManagerFactory(processingEnv, DatafiStaticUtils.getBasePackage(roundEnvironment));
         entities.forEach(entity -> {
             daoFactory.generateDao(entity, annotatedFieldsMap, customSqlQueriesMap, searchMethodsMap);
             dataManagerFactory.addDataManager(entity);
@@ -62,7 +62,7 @@ public class AnnotationProcessor extends AbstractProcessor {
      * @return
      */
     private Set<? extends TypeElement> getPersistableEntities(RoundEnvironment roundEnvironment) {
-        return StaticUtils.getEntitiesSet(roundEnvironment);
+        return DatafiStaticUtils.getEntitiesSet(roundEnvironment);
     }
 
     private void setComponentScan(Set<? extends TypeElement> entities) {
@@ -80,7 +80,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                                     "{$S}",
                                     "dev.sanda")
                             .build());
-            StaticUtils.writeToJavaFile(simpleClassName, basePackageName, builder, processingEnv, "configuration source file");
+            DatafiStaticUtils.writeToJavaFile(simpleClassName, basePackageName, builder, processingEnv, "configuration source file");
         }
     }
 }

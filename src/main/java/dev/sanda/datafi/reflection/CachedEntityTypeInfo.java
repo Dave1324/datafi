@@ -1,6 +1,6 @@
 package dev.sanda.datafi.reflection;
 
-import dev.sanda.datafi.StaticUtils;
+import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatable;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatables;
 import dev.sanda.datafi.annotations.attributes.NonNullable;
@@ -12,10 +12,9 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 @lombok.Getter
-public class CachedEntityType {
+public class CachedEntityTypeInfo {
 
     private Field idField;
-    private Field isArchivedField;
 
     private Class<?> clazz;
     private Object defaultInstance;
@@ -23,7 +22,7 @@ public class CachedEntityType {
     private List<Field> cascadeUpdatableFields;
     private Map<String, Method> publicMethods;
 
-    public CachedEntityType(Class<?> clazz, Collection<Field> fields, Collection<Method> publicMethods) {
+    public CachedEntityTypeInfo(Class<?> clazz, Collection<Field> fields, Collection<Method> publicMethods) {
         this.clazz = clazz;
         this.fields = new HashMap<>();
         fields.forEach(field -> {
@@ -33,13 +32,9 @@ public class CachedEntityType {
             boolean isNonApiUpdatable = isNonApiUpdatable(field);
             boolean isNonNullable = isNonNullableField(field);
             this.fields.put(field.getName(), new CachedEntityField(field, isCollectionOrMap, isNonApiUpdatable, isNonNullable));
-            if(field.isAnnotationPresent(Id.class)) {
+            if(field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
                 this.idField = field;
                 this.idField.setAccessible(true);
-            }
-            if(field.getName().equals("isArchived") && (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class))) {
-                this.isArchivedField = field;
-                this.isArchivedField.setAccessible(true);
             }
         });
         this.publicMethods = new HashMap<>();
@@ -50,7 +45,7 @@ public class CachedEntityType {
 
     public Object invokeGetter(Object instance, String fieldName){
         try {
-            return publicMethods.get("get" + StaticUtils.toPascalCase(fieldName)).invoke(instance);
+            return publicMethods.get("get" + DatafiStaticUtils.toPascalCase(fieldName)).invoke(instance);
         } catch (Exception e){
             throw new RuntimeException(e);
         }
@@ -58,7 +53,7 @@ public class CachedEntityType {
 
     public void invokeSetter(Object instance, String fieldName, Object value){
         try {
-            publicMethods.get("set" + StaticUtils.toPascalCase(fieldName)).invoke(instance, value);
+            publicMethods.get("set" + DatafiStaticUtils.toPascalCase(fieldName)).invoke(instance, value);
         } catch (Exception e){
             throw new RuntimeException(e);
         }
@@ -119,21 +114,6 @@ public class CachedEntityType {
     public Object getId(Object instance){
         try {
             return this.idField.get(instance);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public boolean getIsArchived(Object instance){
-        try {
-            return (boolean) this.isArchivedField.get(instance);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void setIsArchived(Object instance, boolean value){
-        try {
-            this.isArchivedField.set(instance, value);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }

@@ -4,7 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
-import dev.sanda.datafi.StaticUtils;
+import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.service.DataManager;
 import lombok.Data;
 import lombok.NonNull;
@@ -31,7 +31,7 @@ public class DataManagerFactory {
         final ClassName entityType = ClassName.get(entity);
         var builder =
                 MethodSpec
-                .methodBuilder(StaticUtils.camelCaseNameOf(entity) + "DataManager")
+                .methodBuilder(DatafiStaticUtils.camelCaseNameOf(entity) + "DataManager")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Bean.class)
                 .returns(ParameterizedTypeName.get(dataManagerType, entityType))
@@ -60,7 +60,7 @@ public class DataManagerFactory {
                         .build());
     }
     public void writeToFile(){
-        StaticUtils.writeToJavaFile(
+        DatafiStaticUtils.writeToJavaFile(
                 "DataManagersConfig",
                 basePackage,
                 dataManagersConfig,
