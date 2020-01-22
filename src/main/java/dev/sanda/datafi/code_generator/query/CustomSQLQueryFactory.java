@@ -73,7 +73,7 @@ public class CustomSQLQueryFactory {
 
         if(individualQueries != null){
             for (WithQuery query : individualQueries) {
-                customSQLQueries.add(parseQuery(query.name(), query.sql(), entity));
+                customSQLQueries.add(parseQuery(query.name(), query.jpql(), entity));
             }
         }
 

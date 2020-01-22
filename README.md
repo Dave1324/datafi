@@ -143,15 +143,66 @@ public class Person implements Archivable{
 		 return personDataManager.deArchiveCollection(toDeArchive); 
 	 }
  } 
- ```  
-  
-### Custom Queries    
+ ```    
 
-#### Custom SQL
+### Custom SQL
+`JpaRepository` methods are well generally suited to relatively simple database interaction. However, the developers of JPA understood that the only thing capable of encapsulating the full power of SQL is SQL. That's why `JpaRepository` includes the option of specifying custom SQL queries by annotating a method with `@Query(value = "...", nativeQuery = true / false)`. See [here](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.at-query) for the official documentation. 
+
+Datafi allows for this via the following class level annotations:
+1. `@WithQuery(name = "METHOD_NAME_HERE", jpql = "JPQL_QUERY_HERE")`
+Example Model:
+	```
+	@Entity
+	@WithQuery(name = "findByNameAndAge", jpql = "SELECT p FROM Person p WHERE p.name = :name AND p.age = :age")
+	public class Person {
+	    @Id 
+	    @GeneratedValue
+	    private Long id;
+	    private String name;
+	    private Integer age;
+	}
+	```
+	Resulting generated code:
+	```
+	@Repository  
+	public interface PersonDao extends GenericDao<Long, Person> {
+		@Query("SELECT p FROM Person p WHERE p.name = :name AND p.age = :age")
+		 List<Person> findByNameAndAge(@Param("name") String name, @Param("age") Integer age);
+	}
+	```
+	Breakdown:
+	
+	When auto-generating the `JpaRepository` for a given entity, Datafi generates any custom methods that have been specified - which in this case would be the above `@WithQuery(...)` annotation. The provided `name` argument is used as the method name, and the `jpql`  argument is the query itself. See below regarding how argument parameters can be specified.
+2. `@WithNativeQuery(name = "METHOD_NAME_HERE", sql = "NATIVE_SQL_QUERY_HERE")`
+Example Model:
+	```
+	@Entity
+	@WithNativeQuery(name = "findByNameAndAge", sql = "SELECT * FROM Person WHERE name = :name AND age = :age")
+	public class Person {
+	    @Id 
+	    @GeneratedValue
+	    private Long id;
+	    private String name;
+	    private Integer age;
+	}
+	```
+	Resulting generated code:
+	```
+	@Repository  
+	public interface PersonDao extends GenericDao<Long, Person> {
+		@Query("SELECT * FROM Person WHERE name = :name AND age = :age", nativeQuery = true)
+		 List<Person> findByNameAndAge(@Param("name") String name, @Param("age") Integer age);
+	}
+	```
+	Breakdown is the same as the previous, except for the `nativeQuery` flag being set to `true`.
+	
+4. `@WithQueryScripts({"PATH/TO/SOME/FILE_NAME.jpql", "PATH/TO/SOME/OTHER/FILE_NAME.jpql", ...})`
+5. `@WithNativeQueryScripts({"PATH/TO/SOME/FILE_NAME.sql", "PATH/TO/SOME/OTHER/FILE_NAME.sql", ...})`
 
 
- #### @GetBy, and @GetAllBy 
- In addition to the standard JpaRepository methods included by default, you any field can be annotated with the `@GetBy` and / or `@GetAllBy` annotation, and this will generate a corresponding `findBy...(value)`, or `findAllBy...In(List<...> values)`. For example:    
+
+### @GetBy, and @GetAllBy 
+ In addition to the standard JpaRepository methods included by default, any field can be annotated with the `@GetBy` and / or `@GetAllBy` annotation, and this will generate a corresponding `findBy...(value)`, or `findAllBy...In(List<...> values)`. For example:    
     
 ##### Domain model 
 ``` 
