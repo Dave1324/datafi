@@ -7,5 +7,5 @@ import java.lang.annotation.*;
 @Repeatable(WithQueryAccumulator.class)
 public @interface WithQuery {
     String name();
-    String sql();
+    String jpql();
 }

@@ -246,8 +246,8 @@ public class DataManager<T> {
         }
     }
 
-    public T cascadedUpdate(T toUpdate, T source){
-        return (T) cascadedUpdateImpl(toUpdate, source);
+    public T cascadeUpdate(T toUpdate, T source){
+        return (T) cascadeUpdateImpl(toUpdate, source);
     }
 
     public<HasTs> List<T> createAndAddNewToCollectionIn(HasTs toAddTo, String fieldName, List<T> toAdd){
@@ -295,12 +295,12 @@ public class DataManager<T> {
         while(updatedEntitiesIterator.hasNext() && entitiesToUpdateIterator.hasNext()){
             updatedEntity = updatedEntitiesIterator.next();
             entityToUpdate = entitiesToUpdateIterator.next();
-            cascadedUpdateImpl(entityToUpdate, updatedEntity);
+            cascadeUpdateImpl(entityToUpdate, updatedEntity);
         }
         return dao.saveAll(toUpdate);
     }
 
-    private Object cascadedUpdateImpl(Object toUpdate, Object source){
+    private Object cascadeUpdateImpl(Object toUpdate, Object source){
         Class<?> currentClazz = toUpdate.getClass();
         Collection<Field> fieldsToUpdate = reflectionCache.getEntitiesCache().get(currentClazz.getSimpleName()).getCascadeUpdatableFields();
         for(Field currentField : fieldsToUpdate){
@@ -312,7 +312,7 @@ public class DataManager<T> {
                 if(sourceFieldValue == null) continue;
                 //if field is an embedded entity, we need to recursively update all of its fields
                 if(isForeignKey(currentField, toUpdate))
-                    cascadedUpdateImpl(targetFieldValue, sourceFieldValue);
+                    cascadeUpdateImpl(targetFieldValue, sourceFieldValue);
                     //if field is a collection, that's outside of this use case,
                 else
                     //else, (...finally) update field value

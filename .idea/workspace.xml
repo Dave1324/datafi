@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/query/WithQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/query/WithQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,6 +150,7 @@
       <workItem from="1576783296564" duration="14924000" />
       <workItem from="1576957359047" duration="7772000" />
       <workItem from="1577786138490" duration="867000" />
+      <workItem from="1577999054268" duration="4436000" />
     </task>
     <servers />
   </component>
@@ -246,9 +249,18 @@
     </state>
     <state x="332" y="27" width="1024" height="741" key="SettingsEditor/67.27.1299.741@67.27.1299.741" timestamp="1579706358018" />
     <state x="482" y="187" key="SettingsEditor/67.27.1853.1053@67.27.1853.1053" timestamp="1576783254918" />
-    <state x="638" y="150" width="710" height="804" key="find.popup" timestamp="1577998985433">
-      <screen x="67" y="27" width="1853" height="1053" />
+    <state x="372" y="224" key="com.intellij.ide.util.TipDialog" timestamp="1579705396937">
+      <screen x="67" y="27" width="1299" height="741" />
     </state>
+    <state x="372" y="224" key="com.intellij.ide.util.TipDialog/67.27.1299.741@67.27.1299.741" timestamp="1579705396937" />
+    <state x="380" y="69" width="662" height="655" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1579771318629">
+      <screen x="67" y="27" width="1299" height="741" />
+    </state>
+    <state x="380" y="69" width="662" height="655" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/67.27.1299.741@67.27.1299.741" timestamp="1579771318629" />
+    <state x="467" y="114" width="869" height="566" key="find.popup" timestamp="1579772487838">
+      <screen x="67" y="27" width="1299" height="741" />
+    </state>
+    <state x="467" y="114" width="869" height="566" key="find.popup/67.27.1299.741@67.27.1299.741" timestamp="1579772487838" />
     <state x="638" y="150" width="710" height="804" key="find.popup/67.27.1853.1053@67.27.1853.1053" timestamp="1577998985433" />
     <state x="232" y="116" width="1372" height="796" key="new project wizard" timestamp="1579706022324">
       <screen x="67" y="27" width="1299" height="741" />
@@ -259,5 +271,9 @@
       <screen x="67" y="27" width="1853" height="1053" />
     </state>
     <state x="689" y="171" width="598" height="762" key="refactoring.ChangeSignatureDialog/67.27.1853.1053@67.27.1853.1053" timestamp="1576789813511" />
+    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup" timestamp="1578504751560">
+      <screen x="67" y="27" width="1853" height="1053" />
+    </state>
+    <state x="656" y="257" width="672" height="678" key="search.everywhere.popup/67.27.1853.1053@67.27.1853.1053" timestamp="1578504751560" />
   </component>
 </project>
