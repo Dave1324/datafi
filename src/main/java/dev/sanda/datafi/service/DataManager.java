@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import java.lang.reflect.Field;
@@ -32,6 +33,8 @@ import static com.google.common.collect.Maps.immutableEntry;
 @NoArgsConstructor
 @RequiredArgsConstructor
 public class DataManager<T> {
+    @Autowired
+    private EntityManager entityManager;
     @NonNull
     private Class<T> clazz;
     private String clazzSimpleName;
@@ -68,6 +71,10 @@ public class DataManager<T> {
         });
         if(clazz != null)
             setType(clazz);
+    }
+
+    public EntityManager entityManager(){
+        return entityManager;
     }
 
     //spring framework instantiates proxies for each autowired instance.
