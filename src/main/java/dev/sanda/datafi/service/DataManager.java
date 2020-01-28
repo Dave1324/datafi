@@ -1,5 +1,6 @@
 package dev.sanda.datafi.service;
 
+import com.google.common.collect.Lists;
 import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.persistence.GenericDao;
@@ -9,6 +10,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.apache.commons.collections4.IterableUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -27,17 +31,21 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static com.google.common.collect.Maps.immutableEntry;
+import static dev.sanda.datafi.DatafiStaticUtils.*;
 
 @Service
 @SuppressWarnings("unchecked")
 @NoArgsConstructor
 @RequiredArgsConstructor
 public class DataManager<T> {
+    private final Logger log = LoggerFactory.getLogger(DataManager.class);
     @Autowired
     private EntityManager entityManager;
     @NonNull
     private Class<T> clazz;
     private String clazzSimpleName;
+    private String clazzSimpleNamePlural;
+    private String idTypeSimpleName;
     private CachedEntityTypeInfo cachedEntityTypeInfo;
     @Autowired
     protected ReflectionCache reflectionCache;
@@ -53,28 +61,44 @@ public class DataManager<T> {
     /*@Autowired
     private EntityTypeRuntimeResolver<T> typeRuntimeResolver;*/
 
-    public void setType(Class<T> type){
-        this.clazz = type;
-        this.clazzSimpleName = type.getSimpleName();
+    public void setType(){
+        setClazzSimpleName();
         dao = daoMap.get(clazzSimpleName);
         cachedEntityTypeInfo = reflectionCache.getEntitiesCache().get(clazzSimpleName);
     }
 
     @PostConstruct
     private void init(){
+        setClazzSimpleName();
+        log.trace("Running @PostConstruct init method for DataManager<{}>", clazzSimpleName);
         daoMap = new HashMap<>();
         List<? extends GenericDao> daos = daoCollector.getDaos();
         daos.forEach(dao -> {
             String entityName = extractEntityName(dao);
-            if(entityName != null)
+            if(entityName != null) {
                 daoMap.put(entityName, dao);
+            }
         });
-        if(clazz != null)
-            setType(clazz);
+        if(clazz != null) setType();
     }
 
-    public EntityManager entityManager(){
-        return entityManager;
+    private void setClazzSimpleName() {
+        clazzSimpleName = clazz != null ? clazz.getSimpleName() : "Object";
+        clazzSimpleNamePlural = toPlural(clazzSimpleName);
+        idTypeSimpleName =
+                clazz != null ? reflectionCache.getEntitiesCache().get(clazzSimpleName).getIdField().getType().getSimpleName() : "Object";
+    }
+
+    private void logTrace(String method, String msg, Object ...args) {
+        log.trace("DataManager<{}>." + method + " " + msg, clazzSimpleName, args);
+    }
+
+    private void logInfo(String method, String msg, Object ...args) {
+        log.info("DataManager<{}>." + method + " " + msg, clazzSimpleName, args);
+    }
+
+    private void logError(String method, String msg, Object ...args) {
+        log.error("DataManager<{}>." + method + " " + msg, clazzSimpleName, args);
     }
 
     //spring framework instantiates proxies for each autowired instance.
@@ -93,198 +117,321 @@ public class DataManager<T> {
         return endIndex != -1 ? daoName.substring(0, endIndex) : null;
     }
 
-    public List<T> findAll(){return daoMap.get(clazzSimpleName).findAll();}
-    
-    public List<T> findAll(Sort sort) {
-        return dao.findAll(sort);
+    public List<T> findAll(){
+        final List all = daoMap.get(clazzSimpleName).findAll();
+        logInfo("findAll()", "fetched {} {}", all.size(), clazzSimpleNamePlural);
+        return all;
     }
 
-    public Page<T> findAll(Pageable pageable) {return dao.findAll(pageable);}
+    public EntityManager entityManager(){
+        return entityManager;
+    }
 
-    public List<T> findAllById(Iterable<?> iterable) {return dao.findAllById(iterable);}
+    public List<T> findAll(Sort sort) {
+        final List all = dao.findAll(sort);
+        logInfo("findAll(Sort sort)", "fetched {} {}, sorted by {}", all.size(), clazzSimpleNamePlural, sort.toString());
+        return all;
+    }
 
-    public long count() {return dao.count();}
+    public Page<T> findAll(Pageable pageable) {
+        final Page all = dao.findAll(pageable);
+        logInfo("findAll(Pageable pageable)", "fetched {} {}, in {} pages", all.getTotalElements(), clazzSimpleNamePlural, all.getTotalPages());
+        return all;
+    }
+
+    public List<T> findAllById(Iterable<?> iterable) {
+        final List allById = dao.findAllById(iterable);
+        logInfo("findAllById(Iterable<{}> iterable)", "fetched {} {} by id", idTypeSimpleName, allById.size(), clazzSimpleNamePlural);
+        return allById;
+    }
+
+    public long count() {
+        final long count = dao.count();
+        logInfo("count()", "counted a total of {} {}", count, clazzSimpleNamePlural);
+        return count;
+    }
 
     public void deleteById(Object id) {
         dao.deleteById(id);
+        logInfo("deleteById({} id)", "deleted {} by id {}", idTypeSimpleName, clazzSimpleName, id);
     }
 
     public void delete(T t) {
         dao.delete(t);
+        logInfo("delete({} {})", "deleted {} with id {}",
+                clazzSimpleName, toCamelCase(clazzSimpleName), clazzSimpleName,
+                reflectionCache.getEntitiesCache().get(clazzSimpleName).getId(t));
     }
 
     public void deleteAll(Iterable<? extends T> iterable) {
         dao.deleteAll(iterable);
+        logInfo("deleteAll(Iterable<{}> iterable)", "deleted {} {}",
+                clazzSimpleName, Lists.newArrayList(iterable).size(), clazzSimpleNamePlural);
     }
 
     public void deleteAll() {
+        final long count = count();
         dao.deleteAll();
+        logInfo("deleteAll()", "deleted all {} {}", count, clazzSimpleNamePlural);
     }
 
     public <S extends T> S save(S s) {
-        return (S) dao.save(s);
+        final S saved = (S) dao.save(s);
+        logInfo("save({} {})", "saved {}: {}", clazzSimpleName, toCamelCase(clazzSimpleName), clazzSimpleName, s.toString());
+        return saved;
     }
 
     public <S extends T> List<S> saveAll(Iterable<S> iterable) {
-        return dao.saveAll(iterable);
+        final List list = dao.saveAll(iterable);
+        logInfo("saveAll(Iterable<{}> iterable)", "saved {} {}", clazzSimpleName, list.size(), clazzSimpleNamePlural);
+        return list;
     }
 
     public Optional<T> findById(Object id) {
-        return dao.findById(id);
+        final Optional o = dao.findById(id);
+        logInfo("findById({} id)",
+                o.isPresent() ? "fetched {} by id {}" : "could not find {} by id {}",
+                idTypeSimpleName, clazzSimpleName, id);
+        return o;
     }
 
     public boolean existsById(Object id) {
-        return dao.existsById(id);
+        final boolean exists = dao.existsById(id);
+        logInfo("existsById({} id)",
+                exists ? "validated existence of {} by id {}" : "determined non-existence of {} by id {}",
+                idTypeSimpleName, clazzSimpleName, id);
+        return exists;
     }
 
     public void flush() {
         dao.flush();
+        logTrace("flush()", "flushed JpaRepository persistence context");
     }
 
     public <S extends T> S saveAndFlush(S s) {
-        return (S) dao.saveAndFlush(s);
+        final S saved = (S) dao.saveAndFlush(s);
+        logInfo("saveAndFlush({} {})", "saved and flushed {}: {}",
+                clazzSimpleName, toCamelCase(clazzSimpleName), clazzSimpleName, s.toString());
+        return saved;
     }
 
     public void deleteInBatch(Iterable<T> iterable) {
         dao.deleteInBatch(iterable);
+        logInfo("deleteInBatch(Iterable<{}> iterable)", "deleted batch of {} {}",
+                clazzSimpleName, IterableUtils.size(iterable), clazzSimpleNamePlural);
     }
 
     public void deleteAllInBatch() {
         dao.deleteAllInBatch();
+        logInfo("deleteAllInBatch()", "deleted all {}", clazzSimpleNamePlural);
     }
 
     public T getOne(Object id) {
-        return (T) dao.getOne(id);
+        final T fetched = (T) dao.getOne(id);
+        logInfo("getOne({} id)", "fetched one {} by id {}", idTypeSimpleName, clazzSimpleName, id.toString());
+        return fetched;
     }
 
     public <S extends T> Optional<S> findOne(Example<S> example) {
-        return dao.findOne(example);
+        final Optional fetched = dao.findOne(example);
+        logInfo("findOne(Example<{}> example)", fetched.isPresent() ? "fetched one {} by provided example" :
+                        "could not find {} by provided example",
+                clazzSimpleName, clazzSimpleName);
+        return fetched;
     }
 
     public <S extends T> List<S> findAll(Example<S> example) {
-        return dao.findAll(example);
+        final List all = dao.findAll(example);
+        logInfo("findAll(Example<{}> example)", "found all {} by provided example", clazzSimpleName);
+        return all;
     }
 
     public <S extends T> List<S> findAll(Example<S> example, Sort sort) {
-        return dao.findAll(example, sort);
+        final List all = dao.findAll(example, sort);
+        logInfo("findAll(Example<{}> example)", "found all {} {} by provided example, sorted by {}",
+                clazzSimpleName, all.size(), clazzSimpleNamePlural, sort.toString());
+        return all;
     }
 
     public <S extends T> Page<S> findAll(Example<S> example, Pageable pageable) {
-        return dao.findAll(example, pageable);
+        final Page all = dao.findAll(example, pageable);
+        logInfo("findAll(Example<{}> example)", "found all {} {} by provided example, in {} page(s)",
+                clazzSimpleName, all.getTotalElements(), clazzSimpleNamePlural, all.getTotalPages());
+        return all;
     }
 
     public <S extends T> long count(Example<S> example) {
-        return dao.count(example);
+        final long count = dao.count(example);
+        logInfo("count(Example<{}> example)", "counted {} {} by provided example",
+                clazzSimpleName, count, clazzSimpleNamePlural);
+        return count;
     }
 
     public <S extends T> boolean exists(Example<S> example) {
-        return dao.exists(example);
+        final boolean exists = dao.exists(example);
+        logInfo("exists(Example<{}> example)",
+                exists ? "validated existence of {} by provided example" : "determined non-existence of {} by provided example",
+                clazzSimpleName, clazzSimpleName);
+        return exists;
     }
 
 
-    public List<T> getBy(String attributeName, Object attributeValue){
+    public List<T> findBy(String attributeName, Object attributeValue){
         try{
-            Class<?>[] params = new Class<?>[]{attributeValue.getClass()};
-            String resolverName = "findBy" + DatafiStaticUtils.toPascalCase(attributeName);
+            final Class<?> attributeValueClass = attributeValue.getClass();
+            Class<?>[] params = new Class<?>[]{attributeValueClass};
+            String resolverName = "findBy" + toPascalCase(attributeName);
             Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
-            return (List<T>) methodToInvoke.invoke(dao, new Object[]{attributeValue});
+            final List<T> result = (List<T>) methodToInvoke.invoke(dao, new Object[]{attributeValue});
+            logInfo("findBy(String attributeName, {} attributeValue)",
+                    "found {} {} by field {} with matching value of {}",
+                    attributeValueClass.getSimpleName(), result.size(), clazzSimpleNamePlural, attributeValue.toString());
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<T> findByUnique(String attributeName, Object attributeValue){
+        try{
+            final Class<?> attributeValueClass = attributeValue.getClass();
+            Class<?>[] params = new Class<?>[]{attributeValueClass};
+            String resolverName = "findBy" + toPascalCase(attributeName);
+            Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
+            final Optional<T> result = (Optional<T>) methodToInvoke.invoke(dao, new Object[]{attributeValue});
+            logInfo("findByUnique(String attributeName, {} attributeValue)",
+                    result.isPresent() ?
+                            "found {} by field {} with matching value of {}" :
+                            "could not find {} by field {} with matching value of {}",
+                    attributeValueClass.getSimpleName(), clazzSimpleName, attributeName, attributeValue.toString());
+            return result;
         }catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
-    public Optional<T> getByUnique(String attributeName, Object attributeValue){
-        try{
-            Class<?>[] params = new Class<?>[]{attributeValue.getClass()};
-            String resolverName = "findBy" + DatafiStaticUtils.toPascalCase(attributeName);
-            Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
-            return (Optional<T>) methodToInvoke.invoke(dao, new Object[]{attributeValue});
-        }catch (Exception e){
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<T> getAllBy(String attributeName, Object[] attributeValues){
+    public List<T> findAllBy(String attributeName, Object[] attributeValues){
         try{
             Class<?>[] params = new Class<?>[]{List.class};
-            String resolverName = "findAllBy" + DatafiStaticUtils.toPascalCase(attributeName) + "In";
+            String resolverName = "findAllBy" + toPascalCase(attributeName) + "In";
             Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
-            return (List<T>) methodToInvoke.invoke(dao, Arrays.asList(attributeValues));
+            final List<Object> attributeValuesAsList = Arrays.asList(attributeValues);
+            final List<T> result = (List<T>) methodToInvoke.invoke(dao, attributeValuesAsList);
+            logInfo("findAllBy(String attributeName, Object[] attributeValues)",
+                    "found {} {} by provided attribute values: {}",
+                    result.size(), clazzSimpleNamePlural, Arrays.toString(attributeValues));
+            return result;
         }catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
     public Optional<T> findOne(Specification<T> specification) {
-        return dao.findOne(specification);
+        final Optional result = dao.findOne(specification);
+        logInfo("findOne(Specification<{}> specification)",
+                result.isPresent() ? "found one {} by provided specification" : "could not find {} by provided specification",
+                clazzSimpleName);
+        return result;
     }
 
     public List<T> findAll(Specification<T> specification) {
-        return dao.findAll(specification);
+        final List all = dao.findAll(specification);
+        logInfo("findAll(Specification<{}> specification)", "found {} {} by provided specification",
+                clazzSimpleName, all.size(), clazzSimpleNamePlural);
+        return all;
     }
 
     public Page<T> findAll(Specification<T> specification, Pageable pageable) {
-        return dao.findAll(specification, pageable);
+        final Page all = dao.findAll(specification, pageable);
+        logInfo("findAll(Specification<{}> specification, Pageable pageable)",
+                "found {} {} by provided specification in {} pages",
+                clazzSimpleName, all.getTotalElements(), clazzSimpleNamePlural, all.getTotalPages());
+        return all;
     }
 
     public List<T> findAll(Specification<T> specification, Sort sort) {
-        return dao.findAll(specification, sort);
+        final List all = dao.findAll(specification, sort);
+        logInfo("findAll(Specification<{}> specification, Sort sort)",
+                "found {} {} by provided specification, sorted by {}",
+                clazzSimpleName, all.size(), clazzSimpleNamePlural, sort.toString());
+        return all;
     }
 
     public long count(Specification<T> specification) {
-        return dao.count(specification);
+        final long count = dao.count(specification);
+        logInfo("count(Specification<{}> specification)",
+                "counted {} {} by provided specfication",
+                clazzSimpleName, count, clazzSimpleNamePlural);
+        return count;
     }
 
-    public List<T> selectByResolver(String resolverName, Object... args){
+    public <TResult> TResult callQuery(String queryName, Object... args){
         try{
             Class<?>[] params = new Class<?>[args.length];
             for (int i = 0; i < args.length; i++) params[i] = args[i].getClass();
-            Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
-            return (List<T>) methodToInvoke.invoke(dao, args);
+            Method methodToInvoke = getMethodToInvoke(queryName, params, dao);
+            final TResult result = (TResult) methodToInvoke.invoke(dao, args);
+            logInfo("callQuery(String queryName, Object... args)",
+                    Collection.class.isAssignableFrom(result.getClass()) ?
+                    String.format("fetched %d records from database with query '%s'", ((Collection) result).size(), queryName) :
+                    String.format("fetched %s from database with query '%s'", result.getClass().getSimpleName(), queryName));
+            return result;
         }catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
     public T cascadeUpdate(T toUpdate, T source){
-        return (T) cascadeUpdateImpl(toUpdate, source);
+        final T updated = (T) cascadeUpdateImpl(toUpdate, source);
+        logInfo("cascadeUpdate({} toUpdate, {} source)", "cascade updated {}",
+                clazzSimpleName, clazzSimpleName, clazzSimpleName);
+        return updated;
     }
 
     public<HasTs> List<T> createAndAddNewToCollectionIn(HasTs toAddTo, String fieldName, List<T> toAdd){
 
+        final String toAddToClazzName = toAddTo.getClass().getSimpleName();
         GenericDao toAddDao = dao;
-        final String toAddToName = toAddTo.getClass().getSimpleName();
-        GenericDao toAddToDao = daoMap.get(toAddToName);
+        GenericDao toAddToDao = daoMap.get(toAddToClazzName);
 
-        toAddTo = (HasTs) toAddToDao.findById(reflectionCache.getEntitiesCache().get(toAddToName).invokeGetter(toAddTo, "id")).orElse(null);
+        toAddTo = (HasTs) toAddToDao.findById(reflectionCache.getEntitiesCache().get(toAddToClazzName).invokeGetter(toAddTo, "id")).orElse(null);
         if(toAddTo == null) throw new IllegalArgumentException("Could not find an entity with the given id");
-        Method existingCollectionGetter = getMethodToInvoke("get" + DatafiStaticUtils.toPascalCase(fieldName) ,toAddTo);
+        Method existingCollectionGetter = getMethodToInvoke("get" + toPascalCase(fieldName) ,toAddTo);
         Collection<T> existingCollection = (Collection<T>) invoke(existingCollectionGetter, toAddTo);
         existingCollection.addAll(toAdd);
-        Method existingCollectionSetter = getMethodToInvoke("set" + DatafiStaticUtils.toPascalCase(fieldName) ,toAddTo);
+        Method existingCollectionSetter = getMethodToInvoke("set" + toPascalCase(fieldName) ,toAddTo);
         invoke(existingCollectionSetter, toAddTo, existingCollection);
 
         toAddToDao.save(toAddTo);
         toAddDao.saveAll(toAdd);
+        logInfo("createAndAddNewToCollectionIn({} toAddTo, String fieldName, List<{}> toAdd)",
+                "created {} {} and associated them with {} by id: {}",
+                toAddToClazzName, clazzSimpleName, toAdd.size(), clazzSimpleNamePlural, toAddToClazzName,
+                reflectionCache.getIdOf(toAddToClazzName, toAddTo));
         return toAdd;
     }
 
-    public<HasTs> List<T> associateExistingWithCollectionIn(HasTs toAddTo, String fieldName, List<T> toAttach){
+    public<HasTs> List<T> associateExistingWithCollectionIn(HasTs toAssociateWith, String fieldName, List<T> toAssociate){
 
-        GenericDao toAttachDao = dao;
-        final String toAttachToName = toAddTo.getClass().getSimpleName();
-        GenericDao toAttachToDao = daoMap.get(toAttachToName);
+        GenericDao toAssociateDao = dao;
+        final String toAssociateWithClazzName = toAssociateWith.getClass().getSimpleName();
+        GenericDao toAssociateWithDao = daoMap.get(toAssociateWithClazzName);
 
-        toAttach = toAttachDao.findAllById(idList(toAttach));
-        toAddTo = (HasTs) toAttachToDao.findById(reflectionCache.getEntitiesCache().get(toAttachToName).invokeGetter(toAddTo, "id")).orElse(null);
-        if(toAddTo == null) throw new IllegalArgumentException("Could not find an entity with the given id");
-        Method existingCollectionGetter = getMethodToInvoke("get" + DatafiStaticUtils.toPascalCase(fieldName) ,toAddTo);
-        Collection<T> existingCollection = (Collection<T>) invoke(existingCollectionGetter, toAddTo);
-        existingCollection.addAll(toAttach);
-        Method existingCollectionSetter = getMethodToInvoke("set" + DatafiStaticUtils.toPascalCase(fieldName) ,toAddTo);
-        invoke(existingCollectionSetter, toAddTo, existingCollection);
-        toAttachToDao.save(toAddTo);
-        return toAttach;
+        toAssociate = toAssociateDao.findAllById(idList(toAssociate));
+        toAssociateWith = (HasTs) toAssociateWithDao.findById(reflectionCache.getEntitiesCache().get(toAssociateWithClazzName).invokeGetter(toAssociateWith, "id")).orElse(null);
+        if(toAssociateWith == null) throw new IllegalArgumentException("Could not find an entity with the given id");
+        Method existingCollectionGetter = getMethodToInvoke("get" + toPascalCase(fieldName) ,toAssociateWith);
+        Collection<T> existingCollection = (Collection<T>) invoke(existingCollectionGetter, toAssociateWith);
+        existingCollection.addAll(toAssociate);
+        Method existingCollectionSetter = getMethodToInvoke("set" + toPascalCase(fieldName) ,toAssociateWith);
+        invoke(existingCollectionSetter, toAssociateWith, existingCollection);
+        toAssociateWithDao.save(toAssociateWith);
+
+        logInfo("associateExistingWithCollectionIn({} toAssociateWith, String fieldName, List<{}> toAssociate)",
+                "associated {} {} with {} by id: {}",
+                toAssociateWithClazzName, clazzSimpleName, toAssociate.size(), clazzSimpleNamePlural, toAssociateWithClazzName,
+                reflectionCache.getIdOf(toAssociateWithClazzName, toAssociateWith));
+        return toAssociate;
     }
 
     public List<T> cascadeUpdateCollection(Iterable<T> toUpdate, Iterable<T> updated){
@@ -297,11 +444,18 @@ public class DataManager<T> {
             entityToUpdate = entitiesToUpdateIterator.next();
             cascadeUpdateImpl(entityToUpdate, updatedEntity);
         }
+        logInfo("cascadeUpdateCollection(Iterable<{}> toUpdate, Iterable<{}> updated)",
+                "cascade updated collection of {}",
+                clazzSimpleName, clazzSimpleName, clazzSimpleNamePlural);
         return dao.saveAll(toUpdate);
     }
 
-    private Object cascadeUpdateImpl(Object toUpdate, Object source){
+    private Object cascadeUpdateImpl(Object toUpdate, Object source){ ;
         Class<?> currentClazz = toUpdate.getClass();
+        String currentClazzName = currentClazz.getSimpleName();
+        logInfo("cascadeUpdateImpl({} toUpdate, {} source)",
+                "cascade updating {}",
+                currentClazzName, currentClazzName, currentClazzName);
         Collection<Field> fieldsToUpdate = reflectionCache.getEntitiesCache().get(currentClazz.getSimpleName()).getCascadeUpdatableFields();
         for(Field currentField : fieldsToUpdate){
             try {
@@ -396,15 +550,18 @@ public class DataManager<T> {
         try{
             if(searchTerm.equals(""))
                 throw new IllegalArgumentException(
-                        "Illegal attempt to search for " + DatafiStaticUtils.toPlural(clazzSimpleName) + " with blank string"
+                        "Illegal attempt to search for " + clazzSimpleNamePlural + " with blank string"
                 );
             DatafiStaticUtils.validateSortByIfNonNull(clazz, sortBy, reflectionCache);
             Pageable paginator = DatafiStaticUtils.generatePageRequest(offset, limit, sortBy, sortDirection);
             Method methodToInvoke =
                     getMethodToInvoke("freeTextSearch", new Class<?>[]{String.class, Pageable.class}, dao);
-            Page<T> result = (Page<T>) methodToInvoke.invoke(dao, searchTerm, paginator);
-            return result.getContent();
+            List<T> result = ((Page<T>) methodToInvoke.invoke(dao, searchTerm, paginator)).getContent();
+            logInfo("freeTextSearchBy(String searchTerm)", "found {} {} by searchTerm '{}'",
+                    result.size(), clazzSimpleNamePlural, searchTerm);
+            return result;
         }catch (Exception e){
+            logError("freeTextSearchBy(String searchTerm, int offset, int limit, String sortBy, Sort.Direction sortDirection)", e.toString());
             throw new RuntimeException(e);
         }
     }
@@ -415,7 +572,9 @@ public class DataManager<T> {
         T toArchive = findById(id).orElse(null);
         if(toArchive == null) DatafiStaticUtils.throwEntityNotFoundException(simpleName, id);
         ((A)toArchive).setIsArchived(true);
-        return (A) save(toArchive);
+        final A saved = (A) save(toArchive);
+        logInfo("archive({} input)", "archived {} with id {}", clazzSimpleName, clazzSimpleName, id.toString());
+        return saved;
     }
     public <A extends Archivable> A deArchive(A input) {
         Object id = cachedEntityTypeInfo.getId(input);
@@ -423,18 +582,24 @@ public class DataManager<T> {
         T toDeArchive = findById(id).orElse(null);
         if(toDeArchive == null) DatafiStaticUtils.throwEntityNotFoundException(simpleName, id);
         ((A)toDeArchive).setIsArchived(false);
-        return (A) save(toDeArchive);
+        final A saved = (A) save(toDeArchive);
+        logInfo("deArchive({} input)", "de-archived {} with id {}", clazzSimpleName, clazzSimpleName, id.toString());
+        return saved;
     }
     public <A extends Archivable> List<A> archiveCollection(Collection<A> input) {
         List<Object> ids = DatafiStaticUtils.getIdList(input, reflectionCache);
         List<T> toArchive = findAllById(ids);
         toArchive.forEach(item -> ((A)item).setIsArchived(true));
-        return (List<A>) saveAll(toArchive);
+        final List<A> saved = (List<A>) saveAll(toArchive);
+        logInfo("archiveCollection(Collection<{}> input)", "archived {} {}", clazzSimpleName, saved.size(), clazzSimpleNamePlural);
+        return saved;
     }
     public <A extends Archivable> List<A> deArchiveCollection(Collection<A> input) {
         List<Object> ids = DatafiStaticUtils.getIdList(input, reflectionCache);
         List<T> toDeArchive = findAllById(ids);
         toDeArchive.forEach(item -> ((A)item).setIsArchived(false));
-        return (List<A>) saveAll(toDeArchive);
+        final List<A> saved = (List<A>) saveAll(toDeArchive);
+        logInfo("deArchiveCollection(Collection<{}> input)", "de-archived {} {}", clazzSimpleName, saved.size(), clazzSimpleNamePlural);
+        return saved;
     }
 }
