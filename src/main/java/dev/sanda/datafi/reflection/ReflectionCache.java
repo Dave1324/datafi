@@ -76,4 +76,8 @@ public class ReflectionCache {
         }
         return currentClassFields;
     }
+
+    public Object getIdOf(String clazzName, Object instance){
+        return entitiesCache.get(clazzName).getId(instance);
+    }
 }
