@@ -20,6 +20,8 @@
        * [Case 2 - Argument does not correspond to such a field](#case-2---argument-does-not-correspond-to-such-a-field)
        * [Case 3 - Argument has been previously specified within the same query](#case-3---argument-has-been-previously-specified-within-the-same-query)
      - [Annotations](#annotations)
+	 - [Return Types](#return-types)
+     - [Usage](#usage)
  * [@FindBy, and @FindAllBy](#-findby--and--findallby)
      - [Domain model](#domain-model-2)
      - [Example Service Layer](#example-service-layer-1)
@@ -199,6 +201,10 @@ The above two approaches don't scale very well, and are not ideal for longer que
 Same as the previous, except for the queries being native. This means all files specified must have a `.sql` type suffix.
 
 **Note regarding comments:** _All_ comments within queries must open with `/*` and close with `*/`.
+#### Return types
+The default query return type is the annotated entity type itself. If the query is JPQL, it can leverage the [dto projection](https://www.baeldung.com/spring-data-jpa-projections) feature in order to return a different type. Whether a single record or a list of records is returned is implied within the query itself. Queries beginning with `INSERT` or `REPLACE` are assumed to return a single record. Likewise, queries ending with `LIMIT 1` are also assumed to return a single record. In all other cases, a list of records will be returned. 
+#### Usage
+To use such a custom query, call the `public <TResult> TResult callQuery(String queryName, Object... args)` method in `DataManager<T>`. The `queryName` is what it looks like, and the `args` takes in the arguments in the order specified in the corresponding annotation (i.e. The order in which they are specified within the corresponding query itself). 
 
 ## @FindBy, and @FindAllBy 
  Class field can be annotated with the `@FindBy` and / or `@FindAllBy` annotation(s), and this will generate a corresponding `findBy...(value)`, or `findAllBy...In(List<...> values)`. For example:    
