@@ -4,6 +4,7 @@ import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatable;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatables;
 import dev.sanda.datafi.annotations.attributes.NonNullable;
+import dev.sanda.datafi.persistence.Archivable;
 
 import javax.persistence.*;
 import java.lang.reflect.Constructor;
@@ -21,9 +22,11 @@ public class CachedEntityTypeInfo {
     private Map<String, CachedEntityField> fields;
     private List<Field> cascadeUpdatableFields;
     private Map<String, Method> publicMethods;
+    private boolean isArchivable = false;
 
     public CachedEntityTypeInfo(Class<?> clazz, Collection<Field> fields, Collection<Method> publicMethods) {
         this.clazz = clazz;
+        if(Archivable.class.isAssignableFrom(clazz)) isArchivable = true;
         this.fields = new HashMap<>();
         fields.forEach(field -> {
             boolean isCollectionOrMap =
