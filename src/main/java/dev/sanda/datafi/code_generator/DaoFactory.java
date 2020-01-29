@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.squareup.javapoet.ParameterizedTypeName.get;
+import static dev.sanda.datafi.DatafiStaticUtils.isDirectlyOrIndirectlyAnnotatedAs;
 
 @Data
 public class DaoFactory {
@@ -60,19 +61,31 @@ public class DaoFactory {
         DatafiStaticUtils.writeToJavaFile(entity.getSimpleName().toString(), packageName, builder, processingEnv, "JpaRepository");
     }
     private void handleAnnotatedField(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
-        if(annotatedField.getAnnotation(FindBy.class) != null)
+        if(isFindBy(annotatedField))
             handleFindBy(entity, builder, annotatedField);
-        if(annotatedField.getAnnotation(FindAllBy.class) != null)
+        if(isFindAllBy(annotatedField))
             handleFindAllBy(entity, builder, annotatedField);
-        if(annotatedField.getAnnotation(FindByUnique.class) != null)
+        if(isFindByUnique(annotatedField))
             handleFindByUnique(entity, builder, annotatedField);
     }
 
+    private boolean isFindByUnique(VariableElement annotatedField) {
+        return isDirectlyOrIndirectlyAnnotatedAs(annotatedField, FindByUnique.class);
+    }
+
+    private boolean isFindAllBy(VariableElement annotatedField) {
+        return isDirectlyOrIndirectlyAnnotatedAs(annotatedField, FindAllBy.class);
+    }
+
+    private boolean isFindBy(VariableElement annotatedField) {
+        return isDirectlyOrIndirectlyAnnotatedAs(annotatedField, FindBy.class);
+    }
+
     private void handleFindByUnique(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
-        if(annotatedField.getAnnotation(FindBy.class) != null){
-            DatafiStaticUtils.logCompilationError(processingEnv, annotatedField, "@GetBy and @GetByUnique cannot by definition be used together");
+        if(isFindBy(annotatedField)){
+            DatafiStaticUtils.logCompilationError(processingEnv, annotatedField, "@FindBy and @FindByUnique cannot by definition be used together");
         }else if(annotatedField.getAnnotation(Column.class) == null || !annotatedField.getAnnotation(Column.class).unique()){
-            DatafiStaticUtils.logCompilationError(processingEnv, annotatedField, "In order to use @GetByUnique on a field, annotate the field as @Column(unique = true)");
+            DatafiStaticUtils.logCompilationError(processingEnv, annotatedField, "In order to use @FindByUnique on a field, annotate the field as @Column(unique = true)");
         }
         else {
             builder

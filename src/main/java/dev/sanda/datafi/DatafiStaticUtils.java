@@ -22,6 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.tools.Diagnostic;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -160,5 +161,12 @@ public class DatafiStaticUtils {
             result.put(entity, entityFieldsMap);
         }
         return result;
+    }
+
+    public static boolean isDirectlyOrIndirectlyAnnotatedAs(Element element, Class<? extends Annotation> annotationType){
+        boolean isDirectlyAnnotated = element.getAnnotation(annotationType) != null;
+        if(isDirectlyAnnotated) return true;
+        return element.getAnnotationMirrors().stream()
+                .anyMatch(am -> am.getAnnotationType().asElement().getAnnotation(annotationType) != null);
     }
 }

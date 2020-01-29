@@ -12,6 +12,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import java.util.*;
 
+import static dev.sanda.datafi.DatafiStaticUtils.isDirectlyOrIndirectlyAnnotatedAs;
+
 @RequiredArgsConstructor
 public class FindByFieldsResolver {
     @NonNull
@@ -34,10 +36,10 @@ public class FindByFieldsResolver {
         return result;
     }
 
-    private boolean hasFindByAnnotation(Element field) {
+    private boolean hasFindByAnnotation(Element element){
         return
-                field.getAnnotation(FindBy.class) != null ||
-                field.getAnnotation(FindAllBy.class) != null ||
-                field.getAnnotation(FindByUnique.class) != null;
+                isDirectlyOrIndirectlyAnnotatedAs(element, FindBy.class) ||
+                isDirectlyOrIndirectlyAnnotatedAs(element, FindAllBy.class) ||
+                isDirectlyOrIndirectlyAnnotatedAs(element, FindByUnique.class);
     }
 }
