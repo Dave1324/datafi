@@ -6,14 +6,13 @@ import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.persistence.GenericDao;
 import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.ReflectionCache;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.apache.commons.collections4.IterableUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -41,8 +40,9 @@ public class DataManager<T> {
     private final Logger log = LoggerFactory.getLogger(DataManager.class);
     @Autowired
     private EntityManager entityManager;
-    @NonNull
+    @NonNull @Getter
     private Class<T> clazz;
+    @Getter
     private String clazzSimpleName;
     private String clazzSimpleNamePlural;
     private String idTypeSimpleName;
@@ -61,32 +61,26 @@ public class DataManager<T> {
     /*@Autowired
     private EntityTypeRuntimeResolver<T> typeRuntimeResolver;*/
 
-    public void setType(){
-        setClazzSimpleName();
+    public void setType(Class<T> clazz){
+        this.clazz = clazz;
+        setClazzSimpleName(clazz);
         dao = daoMap.get(clazzSimpleName);
         cachedEntityTypeInfo = reflectionCache.getEntitiesCache().get(clazzSimpleName);
     }
 
     @PostConstruct
     private void init(){
-        setClazzSimpleName();
+        setClazzSimpleName(clazz);
         log.trace("Running @PostConstruct init method for DataManager<{}>", clazzSimpleName);
-        daoMap = new HashMap<>();
-        List<? extends GenericDao> daos = daoCollector.getDaos();
-        daos.forEach(dao -> {
-            String entityName = extractEntityName(dao);
-            if(entityName != null) {
-                daoMap.put(entityName, dao);
-            }
-        });
-        if(clazz != null) setType();
+        daoMap = toServicesMap(daoCollector.getDaos(), "Dao");
+        if(clazz != null) setType(clazz);
     }
 
-    private void setClazzSimpleName() {
-        clazzSimpleName = clazz != null ? clazz.getSimpleName() : "Object";
+    private void setClazzSimpleName(Class<T> clazz) {
+        clazzSimpleName = this.clazz != null ? this.clazz.getSimpleName() : "Object";
         clazzSimpleNamePlural = toPlural(clazzSimpleName);
         idTypeSimpleName =
-                clazz != null ? reflectionCache.getEntitiesCache().get(clazzSimpleName).getIdField().getType().getSimpleName() : "Object";
+                this.clazz != null ? reflectionCache.getEntitiesCache().get(clazzSimpleName).getIdField().getType().getSimpleName() : "Object";
     }
 
     private void logTrace(String method, String msg, Object ...args) {
@@ -99,22 +93,6 @@ public class DataManager<T> {
 
     private void logError(String method, String msg, Object ...args) {
         log.error("DataManager<{}>." + method + " " + msg, clazzSimpleName, args);
-    }
-
-    //spring framework instantiates proxies for each autowired instance.
-    //if we want the actual name of the actual bean, we need to
-    //'deproxy' the instance.
-    private String extractEntityName(GenericDao dao) {
-        val interfaces = ((Advised)dao).getProxiedInterfaces();
-        String daoName = "";
-        for(Class<?> interface_ : interfaces){
-            if(interface_.getSimpleName().contains("Dao")){
-                daoName = interface_.getSimpleName();
-                break;
-            }
-        }
-        int endIndex = daoName.indexOf("Dao");
-        return endIndex != -1 ? daoName.substring(0, endIndex) : null;
     }
 
     public List<T> findAll(){

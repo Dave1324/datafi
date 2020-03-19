@@ -7,7 +7,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.ReflectionCache;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.aop.framework.Advised;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -81,7 +83,7 @@ public class DatafiStaticUtils {
         return ids;
     }
 
-    public static PageRequest generatePageRequest(int offset, int limit, String sortBy, Sort.Direction sortingDirection) {
+    public static<T> PageRequest generatePageRequest(int offset, int limit, String sortBy, Sort.Direction sortingDirection) {
         if (((limit - offset) <= 0) || limit < 0 || offset < 0) {
             throw new IllegalArgumentException("Invalid paging range");
         }
@@ -126,7 +128,7 @@ public class DatafiStaticUtils {
 
     public static String getBasePackage(RoundEnvironment roundEnvironment) {
         String commonPrefix = StringUtils.getCommonPrefix(getRootElementNames(roundEnvironment));
-        return commonPrefix.substring(0, commonPrefix.lastIndexOf("."));
+        return commonPrefix.equals("") ? "" : commonPrefix.substring(0, commonPrefix.lastIndexOf("."));
     }
 
     public static String[] getRootElementNames(RoundEnvironment roundEnvironment) {
@@ -168,5 +170,34 @@ public class DatafiStaticUtils {
         if(isDirectlyAnnotated) return true;
         return element.getAnnotationMirrors().stream()
                 .anyMatch(am -> am.getAnnotationType().asElement().getAnnotation(annotationType) != null);
+    }
+
+    //spring framework instantiates proxies for each autowired instance.
+    //if we want the actual name of the actual bean, we need to
+    //'deproxy' the instance.
+    public static String extractActualName(Object proxyInstance, String classNameKeyWord) {
+        val interfaces = ((Advised)proxyInstance).getProxiedInterfaces();
+        String actualName = "";
+        for(Class<?> interface_ : interfaces){
+            if(interface_.getSimpleName().contains(classNameKeyWord)){
+                actualName = interface_.getSimpleName();
+                break;
+            }
+        }
+        int endIndex = actualName.indexOf(classNameKeyWord);
+        return endIndex != -1 ? actualName.substring(0, endIndex) : null;
+    }
+
+    public static<V> Map<String ,V> toServicesMap(List<? extends V> asList, String classNameKeyWord){
+        return asList
+                .stream()
+                .collect(Collectors.toMap(
+                        item -> extractActualName(item, classNameKeyWord),
+                        item -> item)
+                );
+    }
+
+    public static <T> Object getId(T input, ReflectionCache reflectionCache) {
+        return reflectionCache.getIdOf(input.getClass().getSimpleName(), input);
     }
 }
