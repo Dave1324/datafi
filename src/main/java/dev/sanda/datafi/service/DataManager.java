@@ -32,6 +32,10 @@ import java.util.*;
 import static com.google.common.collect.Maps.immutableEntry;
 import static dev.sanda.datafi.DatafiStaticUtils.*;
 
+/*
+DataManager<T> serves as a convenient wrapper around spring-data-jpa functionality
+*/
+
 @Service
 @SuppressWarnings("unchecked")
 @NoArgsConstructor
