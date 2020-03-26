@@ -8,7 +8,6 @@ import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.service.DataManager;
 import lombok.Data;
 import lombok.NonNull;
-import lombok.var;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -29,7 +28,7 @@ public class DataManagerFactory {
 
     public void addDataManager(TypeElement entity){
         final ClassName entityType = ClassName.get(entity);
-        var builder =
+        MethodSpec.Builder builder =
                 MethodSpec
                 .methodBuilder(DatafiStaticUtils.camelCaseNameOf(entity) + "DataManager")
                 .addModifiers(Modifier.PUBLIC)

@@ -18,10 +18,9 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.persistence.*;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -105,11 +104,6 @@ public class DatafiStaticUtils {
         return str.substring(0, 1).toLowerCase();
     }
 
-    /**
-     * In order to generate a JpaRepository<T, ID>, we need the ID id type a given entity
-     * @param entity
-     * @return
-     */
     public static ClassName getIdType(TypeElement entity, ProcessingEnvironment processingEnv) {
         for(Element field : entity.getEnclosedElements()){
             if(field.getKind() == ElementKind.FIELD &&
@@ -119,10 +113,38 @@ public class DatafiStaticUtils {
                 return (ClassName) ClassName.get(field.asType());
             }
         }
+        VariableElement idField;
+        if((idField = getPrimaryKeyJoinColumn(entity, processingEnv)) != null)
+            return (ClassName) ClassName.get(idField.asType());
         processingEnv
                 .getMessager()
                 .printMessage(Diagnostic.Kind.ERROR,
                         "No id type found for entity " + entity.getSimpleName().toString(), entity);
+        return null;
+    }
+
+    private static VariableElement getPrimaryKeyJoinColumn(
+            TypeElement entity,
+            ProcessingEnvironment processingEnv) {
+        val superClass = (TypeElement)((DeclaredType)entity.getSuperclass()).asElement();
+        if(superClass.getAnnotation(Entity.class) != null || superClass.getAnnotation(Table.class) != null){
+            String primaryKeyJoinColumnName;
+            val primaryKeyJoinColumnAnnotation = entity.getAnnotation(PrimaryKeyJoinColumn.class);
+            if(primaryKeyJoinColumnAnnotation != null)
+                primaryKeyJoinColumnName = primaryKeyJoinColumnAnnotation.referencedColumnName();
+            else
+                primaryKeyJoinColumnName  = superClass.getEnclosedElements().stream()
+                        .filter(e -> e.getAnnotation(Id.class) != null || e.getAnnotation(EmbeddedId.class) != null)
+                        .map(idField -> idField.getSimpleName().toString())
+                        .findFirst()
+                        .orElse("id");
+            return superClass.getEnclosedElements().stream()
+                    .filter(elem -> elem.getKind().isField() &&
+                            elem.getSimpleName().toString().equals(primaryKeyJoinColumnName))
+                    .map(idField -> (VariableElement)idField)
+                    .findFirst()
+                    .orElse(null);
+        }
         return null;
     }
 

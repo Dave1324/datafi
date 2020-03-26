@@ -8,7 +8,7 @@ import dev.sanda.datafi.annotations.query.WithQuery;
 import dev.sanda.datafi.annotations.query.WithQueryScripts;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.var;
+import lombok.val;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.util.FileCopyUtils;
@@ -51,7 +51,7 @@ public class CustomSQLQueryFactory {
     }
 
     private MethodSpec generateCustomQueryMethod(CustomSQLQuery query) {
-        var queryAnnotationBuilder = AnnotationSpec.builder(Query.class)
+        AnnotationSpec.Builder queryAnnotationBuilder = AnnotationSpec.builder(Query.class)
                 .addMember("value", "$S", query.getSql());
         if(query.isNative())
             queryAnnotationBuilder.addMember("nativeQuery", "$L", true);
@@ -107,7 +107,7 @@ public class CustomSQLQueryFactory {
         //set nativeQuery flag
         boolean nativeQuery = determineIfIsNativeQuery(path);
         //set isNativeQuery
-        var result = parseQuery(name, sql, entity);
+        CustomSQLQuery result = parseQuery(name, sql, entity);
         result.setNative(nativeQuery);
         return result;
     }
@@ -159,6 +159,7 @@ public class CustomSQLQueryFactory {
         for (String lexeme : lexemes) {
             if((arg = parseLexemeForArg(lexeme, args, entitiesFields.get(entity))) != null) {
                 args.putIfAbsent(arg.getKey(), arg.getValue());
+                val toAppend = arg.getValue().toString();
                 finalSql.append(" :").append(arg.getKey());
             }else{
                 finalSql.append(" ").append(lexeme);
@@ -177,7 +178,7 @@ public class CustomSQLQueryFactory {
                     lexeme + " contains more than two colons, " +
                             "must be either two or one for valid arg syntax.", env);
         }
-        final String argName = lexeme.substring(lexeme.lastIndexOf(":") + 1);
+        val argName = lexeme.substring(lexeme.lastIndexOf(":") + 1).replaceAll("'", "");
         TypeName argType;
         if(lexeme.contains("::")){
             if(argsSoFar.containsKey(argName)){
