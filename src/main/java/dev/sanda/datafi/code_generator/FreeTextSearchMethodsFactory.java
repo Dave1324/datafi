@@ -19,6 +19,7 @@ import javax.lang.model.element.VariableElement;
 import java.util.*;
 
 import static com.squareup.javapoet.ParameterizedTypeName.get;
+import static dev.sanda.datafi.DatafiStaticUtils.isArchivable;
 
 @Data
 public class FreeTextSearchMethodsFactory {
@@ -62,7 +63,7 @@ public class FreeTextSearchMethodsFactory {
                         .addMember("value", "$S", "searchTerm")
                         .build())
                 .build();
-        String freeTextSearchQuery = freeTextSearchQuery(entityName, searchFields);
+        String freeTextSearchQuery = freeTextSearchQuery(entityName, searchFields, isArchivable(entity, processingEnv));
         return MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .addParameter(argument)
@@ -75,20 +76,12 @@ public class FreeTextSearchMethodsFactory {
     }
 
     private boolean isSearchByField(List<String> classLevelSearchByFieldNames, Element enclosedElement) {
-        boolean isDeclaredAsSearchBy = enclosedElement.getKind().isField() &&
+        return enclosedElement.getKind().isField() &&
                 (enclosedElement.getAnnotation(FreeTextSearchBy.class) != null ||
                         classLevelSearchByFieldNames.contains(enclosedElement.getSimpleName().toString()));
-        if(isDeclaredAsSearchBy && !"java.lang.String".equals(enclosedElement.asType().toString())){
-            DatafiStaticUtils.logCompilationError(processingEnv, enclosedElement,
-                    "field " + enclosedElement.asType().toString() + " " +
-                            enclosedElement.getSimpleName().toString() + " is marked as free text search parameter" +
-                            " but is not of type java.lang.String");
-            return false;
-        }
-        return isDeclaredAsSearchBy;
     }
 
-    private String freeTextSearchQuery(String entityName, List<VariableElement> searchFields) {
+    private String freeTextSearchQuery(String entityName, List<VariableElement> searchFields, boolean isArchivable) {
         String placeHolder = DatafiStaticUtils.firstLowerCaseLetterOf(entityName);
         StringBuilder result = new StringBuilder("SELECT " + placeHolder + " FROM " + entityName + " " + placeHolder);
         boolean isFirst = true;
@@ -99,6 +92,8 @@ public class FreeTextSearchMethodsFactory {
                     "LIKE lower(concat('%', :searchTerm, '%'))";
             result.append(conditionPrefix);
             result.append(condition);
+            if(isArchivable)
+                result.append(" AND ").append(placeHolder).append(".isArchived = false");
         }
         return result.toString();
     }

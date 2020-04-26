@@ -5,12 +5,15 @@ import dev.sanda.datafi.annotations.attributes.NonApiUpdatable;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatables;
 import dev.sanda.datafi.annotations.attributes.NonNullable;
 import dev.sanda.datafi.persistence.Archivable;
+import lombok.val;
 
 import javax.persistence.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+
+import static dev.sanda.datafi.reflection.ReflectionCache.getClassFields;
 
 @lombok.Getter
 public class CachedEntityTypeInfo {
@@ -29,12 +32,16 @@ public class CachedEntityTypeInfo {
         if(Archivable.class.isAssignableFrom(clazz)) isArchivable = true;
         this.fields = new HashMap<>();
         fields.forEach(field -> {
-            boolean isCollectionOrMap =
-                    Iterable.class.isAssignableFrom(field.getType()) ||
-                            Map.class.isAssignableFrom(field.getType());
+            boolean isCollectionOrMap = isCollectionOrMap(field);
             boolean isNonApiUpdatable = isNonApiUpdatable(field);
             boolean isNonNullable = isNonNullableField(field);
-            this.fields.put(field.getName(), new CachedEntityField(field, isCollectionOrMap, isNonApiUpdatable, isNonNullable));
+            if(field.isAnnotationPresent(Embedded.class) || field.isAnnotationPresent(EmbeddedId.class)){
+                this.fields.putAll(nestedEmbeddedFields(field));
+            }
+            this.fields.put(
+                    field.getName(),
+                    new CachedEntityField(field, isCollectionOrMap, isNonApiUpdatable, isNonNullable)
+            );
             if(field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
                 this.idField = field;
                 this.idField.setAccessible(true);
@@ -44,6 +51,25 @@ public class CachedEntityTypeInfo {
         publicMethods.forEach(publicMethod -> this.publicMethods.put(publicMethod.getName(), publicMethod));
         this.defaultInstance = genDefaultInstance(clazz);
         setCascadeUpdatableFields();
+    }
+
+    private boolean isCollectionOrMap(Field field) {
+        return Iterable.class.isAssignableFrom(field.getType()) ||
+                Map.class.isAssignableFrom(field.getType());
+    }
+
+    private Map<String, CachedEntityField> nestedEmbeddedFields(Field embeddedField) {
+        Map<String, CachedEntityField> nestedFieldsMap = new HashMap<>();
+        getClassFields(embeddedField.getType()).forEach(nestedField -> {
+            val isCollectionOrMap = isCollectionOrMap(embeddedField);
+            val isNonApiUpdatable = isNonApiUpdatable(embeddedField);
+            val isNonNullable = isNonNullableField(embeddedField);
+            nestedFieldsMap.put(
+                    embeddedField.getName() + "." + nestedField.getName(),
+                    new CachedEntityField(nestedField, isCollectionOrMap, isNonApiUpdatable, isNonNullable)
+            );
+        });
+        return nestedFieldsMap;
     }
 
     public Object invokeGetter(Object instance, String fieldName){

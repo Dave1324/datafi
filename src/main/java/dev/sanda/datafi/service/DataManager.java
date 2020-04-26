@@ -2,29 +2,25 @@ package dev.sanda.datafi.service;
 
 import com.google.common.collect.Lists;
 import dev.sanda.datafi.DatafiStaticUtils;
+import dev.sanda.datafi.dto.FreeTextSearchPageRequest;
+import dev.sanda.datafi.dto.Page;
 import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.persistence.GenericDao;
 import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.ReflectionCache;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.apache.commons.collections4.IterableUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -115,8 +111,8 @@ public class DataManager<T> {
         return all;
     }
 
-    public Page<T> findAll(Pageable pageable) {
-        final Page all = dao.findAll(pageable);
+    public org.springframework.data.domain.Page findAll(Pageable pageable) {
+        final org.springframework.data.domain.Page all = dao.findAll(pageable);
         logInfo("findAll(Pageable pageable)", "fetched {} {}, in {} pages", all.getTotalElements(), clazzSimpleNamePlural, all.getTotalPages());
         return all;
     }
@@ -235,8 +231,8 @@ public class DataManager<T> {
         return all;
     }
 
-    public <S extends T> Page<S> findAll(Example<S> example, Pageable pageable) {
-        final Page all = dao.findAll(example, pageable);
+    public <S extends T> org.springframework.data.domain.Page findAll(Example<S> example, Pageable pageable) {
+        final org.springframework.data.domain.Page all = dao.findAll(example, pageable);
         logInfo("findAll(Example<{}> example)", "found all {} {} by provided example, in {} page(s)",
                 clazzSimpleName, all.getTotalElements(), clazzSimpleNamePlural, all.getTotalPages());
         return all;
@@ -323,8 +319,8 @@ public class DataManager<T> {
         return all;
     }
 
-    public Page<T> findAll(Specification<T> specification, Pageable pageable) {
-        final Page all = dao.findAll(specification, pageable);
+    public org.springframework.data.domain.Page findAll(Specification<T> specification, Pageable pageable) {
+        final org.springframework.data.domain.Page all = dao.findAll(specification, pageable);
         logInfo("findAll(Specification<{}> specification, Pageable pageable)",
                 "found {} {} by provided specification in {} pages",
                 clazzSimpleName, all.getTotalElements(), clazzSimpleNamePlural, all.getTotalPages());
@@ -449,8 +445,8 @@ public class DataManager<T> {
                 //if field is an embedded entity, we need to recursively update all of its fields
                 if(isForeignKey(currentField, toUpdate))
                     cascadeUpdateImpl(targetFieldValue, sourceFieldValue);
-                    //if field is a collection, that's outside of this use case,
-                else
+                //if field is a foreign key collection, that's outside of this use case
+                else if(!isForeignKeyCollection(currentField))
                     //else, (...finally) update field value
                     currentField.set(toUpdate, sourceFieldValue);
             } catch (Exception e) {
@@ -459,6 +455,11 @@ public class DataManager<T> {
             }
         }
         return daoMap.get(currentClazz.getSimpleName()).save(toUpdate);
+    }
+
+    private boolean isForeignKeyCollection(Field f) {
+        f.setAccessible(true);
+        return f.isAnnotationPresent(OneToMany.class) || f.isAnnotationPresent(ManyToMany.class);
     }
 
     private boolean isForeignKey(Field currentField, Object owner) {
@@ -517,31 +518,23 @@ public class DataManager<T> {
         return ids;
     }
 
-    //implicit / default pagination
-    public List<T> freeTextSearchBy(String searchTerm){
-        return freeTextSearchBy(searchTerm, 0, 50);
-    }
-
-    //explicit pagination
-    public List<T> freeTextSearchBy(String searchTerm, int offset, int limit){
-        return freeTextSearchBy(searchTerm, offset, limit, null, null);
-    }
-
+    public static final int DEFAULT_PAGE_SIZE = 25;
     //explicit pagination with sort
-    public List<T> freeTextSearchBy(String searchTerm, int offset, int limit, String sortBy, Sort.Direction sortDirection){
+    public Page<T> freeTextSearchBy(FreeTextSearchPageRequest request){
         try{
-            if(searchTerm.equals(""))
+            if(request.getSearchTerm() == null || request.getSearchTerm().equals(""))
                 throw new IllegalArgumentException(
-                        "Illegal attempt to search for " + clazzSimpleNamePlural + " with blank string"
+                        "Illegal attempt to search for " + clazzSimpleNamePlural + " with null or blank string"
                 );
-            DatafiStaticUtils.validateSortByIfNonNull(clazz, sortBy, reflectionCache);
-            Pageable paginator = DatafiStaticUtils.generatePageRequest(offset, limit, sortBy, sortDirection);
+            DatafiStaticUtils.validateSortByIfNonNull(clazz, request.getSortBy(), reflectionCache);
+            Pageable paginator = DatafiStaticUtils.generatePageRequest(request);
             Method methodToInvoke =
                     getMethodToInvoke("freeTextSearch", new Class<?>[]{String.class, Pageable.class}, dao);
-            List<T> result = ((Page<T>) methodToInvoke.invoke(dao, searchTerm, paginator)).getContent();
+            val result = (org.springframework.data.domain.Page) methodToInvoke
+                    .invoke(dao, request.getSearchTerm(), paginator);
             logInfo("freeTextSearchBy(String searchTerm)", "found {} {} by searchTerm '{}'",
-                    result.size(), clazzSimpleNamePlural, searchTerm);
-            return result;
+                    result.getTotalElements(), clazzSimpleNamePlural, request.getSearchTerm());
+            return new Page<>(result);
         }catch (Exception e){
             logError("freeTextSearchBy(String searchTerm, int offset, int limit, String sortBy, Sort.Direction sortDirection)", e.toString());
             throw new RuntimeException(e);

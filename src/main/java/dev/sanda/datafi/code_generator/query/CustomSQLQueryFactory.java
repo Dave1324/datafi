@@ -159,7 +159,6 @@ public class CustomSQLQueryFactory {
         for (String lexeme : lexemes) {
             if((arg = parseLexemeForArg(lexeme, args, entitiesFields.get(entity))) != null) {
                 args.putIfAbsent(arg.getKey(), arg.getValue());
-                val toAppend = arg.getValue().toString();
                 finalSql.append(" :").append(arg.getKey());
             }else{
                 finalSql.append(" ").append(lexeme);

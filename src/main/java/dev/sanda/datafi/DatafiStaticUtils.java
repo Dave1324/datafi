@@ -5,6 +5,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.ReflectionCache;
 import lombok.val;
@@ -20,6 +21,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.persistence.*;
 import javax.tools.Diagnostic;
 import java.io.IOException;
@@ -82,14 +84,18 @@ public class DatafiStaticUtils {
         return ids;
     }
 
-    public static<T> PageRequest generatePageRequest(int offset, int limit, String sortBy, Sort.Direction sortingDirection) {
-        if (((limit - offset) <= 0) || limit < 0 || offset < 0) {
+    public static<T> PageRequest generatePageRequest(dev.sanda.datafi.dto.PageRequest request) {
+        if (!request.isValidPagingRange()) {
             throw new IllegalArgumentException("Invalid paging range");
         }
-        if (sortBy != null) {
-            return PageRequest.of(offset, limit, Sort.by(sortingDirection, sortBy));
+        if (request.getSortBy() != null) {
+            return PageRequest.of(
+                    request.getPageNumber(),
+                    request.getPageSize(),
+                    Sort.by(request.getSortDirection(), request.getSortBy())
+            );
         } else
-            return PageRequest.of(offset, limit);
+            return PageRequest.of(request.getPageNumber(), request.getPageSize());
     }
 
     public static void validateSortByIfNonNull(Class<?> clazz, String sortByFieldName, ReflectionCache reflectionCache){
@@ -221,5 +227,19 @@ public class DatafiStaticUtils {
 
     public static <T> Object getId(T input, ReflectionCache reflectionCache) {
         return reflectionCache.getIdOf(input.getClass().getSimpleName(), input);
+    }
+
+    public static boolean isArchivable(TypeElement entity, ProcessingEnvironment processingEnv){
+        return implementsInterface(
+                entity,
+                processingEnv
+                        .getElementUtils()
+                        .getTypeElement(Archivable.class.getCanonicalName())
+                        .asType(),
+                processingEnv);
+    }
+
+    public static boolean implementsInterface(TypeElement myTypeElement, TypeMirror desiredInterface, ProcessingEnvironment processingEnv) {
+        return processingEnv.getTypeUtils().isAssignable(myTypeElement.asType(), desiredInterface);
     }
 }
