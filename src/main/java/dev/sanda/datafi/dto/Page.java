@@ -1,18 +1,21 @@
 package dev.sanda.datafi.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
-@Getter
+@Getter @Setter
+@NoArgsConstructor
 public class Page<T> {
-    private final List<T> content;
-    private final long totalPagesCount;
-    private final long totalRecordsCount;
+    private List<T> content;
+    private Long totalPagesCount;
+    private Long totalItemsCount;
 
     public Page(org.springframework.data.domain.Page<T> page){
         content = page.getContent();
-        totalPagesCount = page.getTotalPages();
-        totalRecordsCount = page.getTotalElements();
+        totalPagesCount = (long) page.getTotalPages();
+        totalItemsCount = page.getTotalElements();
     }
 }

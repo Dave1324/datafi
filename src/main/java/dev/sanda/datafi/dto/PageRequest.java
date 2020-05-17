@@ -11,6 +11,7 @@ public class PageRequest {
     private String sortBy;
     private Integer pageSize = 25;
     private Sort.Direction sortDirection = ASC;
+    private Boolean fetchAll = false;
 
     public boolean isValidPagingRange(){
         return pageNumber >= 0 && pageSize > 0;

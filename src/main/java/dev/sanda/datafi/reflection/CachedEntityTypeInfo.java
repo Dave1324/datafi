@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static dev.sanda.datafi.DatafiStaticUtils.hasOneOfAnnotations;
 import static dev.sanda.datafi.reflection.ReflectionCache.getClassFields;
 
 @lombok.Getter
@@ -23,11 +24,14 @@ public class CachedEntityTypeInfo {
     private Class<?> clazz;
     private Object defaultInstance;
     private Map<String, CachedEntityField> fields;
+    private HashSet<String> sortKeys;
     private List<Field> cascadeUpdatableFields;
     private Map<String, Method> publicMethods;
+    private List<String> searchFields;
     private boolean isArchivable = false;
 
     public CachedEntityTypeInfo(Class<?> clazz, Collection<Field> fields, Collection<Method> publicMethods) {
+        sortKeys = new HashSet<>();
         this.clazz = clazz;
         if(Archivable.class.isAssignableFrom(clazz)) isArchivable = true;
         this.fields = new HashMap<>();
@@ -35,13 +39,13 @@ public class CachedEntityTypeInfo {
             boolean isCollectionOrMap = isCollectionOrMap(field);
             boolean isNonApiUpdatable = isNonApiUpdatable(field);
             boolean isNonNullable = isNonNullableField(field);
-            if(field.isAnnotationPresent(Embedded.class) || field.isAnnotationPresent(EmbeddedId.class)){
-                this.fields.putAll(nestedEmbeddedFields(field));
-            }
+            if(isEmbeddedOrForeignKey(field))
+                addNestedSortKeys(field, field.getName() + ".", new Stack<>());
             this.fields.put(
                     field.getName(),
                     new CachedEntityField(field, isCollectionOrMap, isNonApiUpdatable, isNonNullable)
             );
+            sortKeys.add(field.getName());
             if(field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
                 this.idField = field;
                 this.idField.setAccessible(true);
@@ -53,23 +57,26 @@ public class CachedEntityTypeInfo {
         setCascadeUpdatableFields();
     }
 
+    private boolean isEmbeddedOrForeignKey(Field field) {
+        return hasOneOfAnnotations(field, EmbeddedId.class, Embedded.class, ManyToOne.class, OneToOne.class);
+    }
+
     private boolean isCollectionOrMap(Field field) {
         return Iterable.class.isAssignableFrom(field.getType()) ||
                 Map.class.isAssignableFrom(field.getType());
     }
 
-    private Map<String, CachedEntityField> nestedEmbeddedFields(Field embeddedField) {
-        Map<String, CachedEntityField> nestedFieldsMap = new HashMap<>();
-        getClassFields(embeddedField.getType()).forEach(nestedField -> {
-            val isCollectionOrMap = isCollectionOrMap(embeddedField);
-            val isNonApiUpdatable = isNonApiUpdatable(embeddedField);
-            val isNonNullable = isNonNullableField(embeddedField);
-            nestedFieldsMap.put(
-                    embeddedField.getName() + "." + nestedField.getName(),
-                    new CachedEntityField(nestedField, isCollectionOrMap, isNonApiUpdatable, isNonNullable)
-            );
+    private void addNestedSortKeys(Field currentRoot, String currentPrefix, Stack<Class<?>> typesSoFar){
+        val currentRootType = currentRoot.getType();
+        if(typesSoFar.contains(currentRootType)) return;
+        typesSoFar.push(currentRootType);
+        getClassFields(currentRootType).forEach(field -> {
+            if(isEmbeddedOrForeignKey(field))
+                addNestedSortKeys(field, currentPrefix + field.getName() + ".", typesSoFar);
+            val fieldName = currentPrefix + field.getName();
+            sortKeys.add(fieldName);
         });
-        return nestedFieldsMap;
+        typesSoFar.pop();
     }
 
     public Object invokeGetter(Object instance, String fieldName){

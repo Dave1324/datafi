@@ -10,22 +10,21 @@ import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.ReflectionCache;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.atteo.evo.inflector.English;
 import org.springframework.aop.framework.Advised;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.persistence.*;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,14 +36,8 @@ public class DatafiStaticUtils {
     public static String toCamelCase(String string){
         return string.substring(0, 1).toLowerCase() + string.substring(1);
     }
-    public static String toPlural(String aString){
-        String suffix = "";
-        if(aString.endsWith("s")) suffix = "es";
-        else if(aString.endsWith("y")) {
-            aString = aString.substring(0, aString.length() - 1);
-            suffix = "ies";
-        } else suffix  ="s";
-        return aString + suffix;
+    public static String toPlural(String word){
+        return English.plural(word);
     }
 
     public static void logCompilationError(ProcessingEnvironment processingEnvironment, Element element, String message) {
@@ -84,24 +77,31 @@ public class DatafiStaticUtils {
         return ids;
     }
 
-    public static<T> PageRequest generatePageRequest(dev.sanda.datafi.dto.PageRequest request) {
-        if (!request.isValidPagingRange()) {
+    public static<T> PageRequest generatePageRequest(dev.sanda.datafi.dto.PageRequest request,  long totalCount) {
+        int pageNumber, pageSize;
+        if(request.getFetchAll()){
+            pageNumber = 0;
+            pageSize = (int) totalCount;
+        }
+        else if (!request.isValidPagingRange()) {
             throw new IllegalArgumentException("Invalid paging range");
+        }else {
+            pageNumber = request.getPageNumber();
+            pageSize = request.getPageSize();
         }
         if (request.getSortBy() != null) {
             return PageRequest.of(
-                    request.getPageNumber(),
-                    request.getPageSize(),
+                    pageNumber, pageSize,
                     Sort.by(request.getSortDirection(), request.getSortBy())
             );
         } else
-            return PageRequest.of(request.getPageNumber(), request.getPageSize());
+            return PageRequest.of(pageNumber, pageSize);
     }
 
     public static void validateSortByIfNonNull(Class<?> clazz, String sortByFieldName, ReflectionCache reflectionCache){
         if(sortByFieldName == null) return;
         CachedEntityTypeInfo entityTypeInfo = reflectionCache.getEntitiesCache().get(clazz.getSimpleName());
-        if(entityTypeInfo.getFields().get(sortByFieldName) == null)
+        if(!entityTypeInfo.getSortKeys().contains(sortByFieldName))
             throw new IllegalArgumentException(
                     "Cannot sort by "+ sortByFieldName +" as there is no such field in " + clazz.getName());
     }
@@ -179,6 +179,10 @@ public class DatafiStaticUtils {
         return toCamelCase(element.getSimpleName().toString());
     }
 
+    public static String simpleNameOf(Element element){
+        return element.getSimpleName().toString();
+    }
+
     public static Map<TypeElement, Map<String, TypeName>> getEntitiesFieldsMap(Set<? extends TypeElement> entities) {
         Map<TypeElement, Map<String, TypeName>> result = new HashMap<>();
         for (TypeElement entity : entities) {
@@ -241,5 +245,12 @@ public class DatafiStaticUtils {
 
     public static boolean implementsInterface(TypeElement myTypeElement, TypeMirror desiredInterface, ProcessingEnvironment processingEnv) {
         return processingEnv.getTypeUtils().isAssignable(myTypeElement.asType(), desiredInterface);
+    }
+
+    public static boolean hasOneOfAnnotations(Element element, Class<? extends Annotation>... annotationTypes){
+        return Arrays.stream(annotationTypes).anyMatch(type -> element.getAnnotation(type) != null);
+    }
+    public static boolean hasOneOfAnnotations(Field field, Class<? extends Annotation>... annotationTypes){
+        return Arrays.stream(annotationTypes).anyMatch(field::isAnnotationPresent);
     }
 }

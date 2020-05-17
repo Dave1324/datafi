@@ -6,6 +6,7 @@
     <properties>
         <commons-lang3.version>3.9</commons-lang3.version>
         <commons-collections4.version>4.1</commons-collections4.version>
+        <evo-inflector.version>1.2.2</evo-inflector.version>
     </properties>
 
     <parent>
@@ -16,7 +17,7 @@
     </parent>
 
     <artifactId>datafi</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.4-dev1</version>
 
     <dependencies>
         <dependency>
@@ -27,6 +28,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.atteo</groupId>
+            <artifactId>evo-inflector</artifactId>
+            <version>${evo-inflector.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

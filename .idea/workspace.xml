@@ -2,13 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/FreeTextSearchPageRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/FreeTextSearchBy.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/FreeTextSearchByFields.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/WithFreeTextSearchByFields.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityTypeInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityTypeInfo.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" afterDir="false" />
     </list>
@@ -62,6 +63,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -145,7 +147,19 @@
       <workItem from="1587643022653" duration="287000" />
       <workItem from="1587645600911" duration="521000" />
       <workItem from="1587650808807" duration="1854000" />
-      <workItem from="1587884570998" duration="3285000" />
+      <workItem from="1587884570998" duration="3307000" />
+      <workItem from="1588013934603" duration="599000" />
+      <workItem from="1588069153270" duration="1972000" />
+      <workItem from="1588073251263" duration="951000" />
+      <workItem from="1588242830253" duration="7687000" />
+      <workItem from="1588326470785" duration="164000" />
+      <workItem from="1588326690530" duration="1212000" />
+      <workItem from="1588497095837" duration="88000" />
+      <workItem from="1588706071486" duration="667000" />
+      <workItem from="1588709704467" duration="209000" />
+      <workItem from="1588782346381" duration="1365000" />
+      <workItem from="1589273848055" duration="59000" />
+      <workItem from="1589539529241" duration="12162000" />
     </task>
     <servers />
   </component>
@@ -165,14 +179,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="311" y="58" width="800" height="677" key="#Scopes" timestamp="1579705759908">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="311" y="58" width="800" height="677" key="#Scopes/67.27.1299.741@67.27.1299.741" timestamp="1579705759908" />
-    <state x="412" y="201" width="598" height="390" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1579705981746">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="412" y="201" width="598" height="390" key="#com.intellij.fileTypes.FileTypeChooser/67.27.1299.741@67.27.1299.741" timestamp="1579705981746" />
     <state x="524" y="104" width="374" height="585" key="#com.intellij.ide.util.MemberChooser" timestamp="1587886699846">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
@@ -181,108 +187,82 @@
       <screen x="67" y="27" width="1299" height="741" />
     </state>
     <state x="605" y="320" width="308" height="152" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/67.27.1299.741@67.27.1299.741" timestamp="1585254990158" />
-    <state x="547" y="175" width="577" height="593" key="#xdebugger.evaluate" timestamp="1585725824527">
+    <state x="473" y="81" width="577" height="593" key="#xdebugger.evaluate" timestamp="1589544162484">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="547" y="175" width="577" height="593" key="#xdebugger.evaluate/67.27.1299.741@67.27.1299.741" timestamp="1585725824527" />
-    <state width="545" height="466" key="DebuggerActiveHint" timestamp="1584538861462">
+    <state x="473" y="81" width="577" height="593" key="#xdebugger.evaluate/67.27.1299.741@67.27.1299.741" timestamp="1589544162484" />
+    <state width="614" height="466" key="DebuggerActiveHint" timestamp="1589545104858">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="545" height="466" key="DebuggerActiveHint/67.27.1299.741@67.27.1299.741" timestamp="1584538861462" />
-    <state x="561" y="216" width="374" height="361" key="FileChooserDialogImpl" timestamp="1580218855880">
+    <state width="614" height="466" key="DebuggerActiveHint/67.27.1299.741@67.27.1299.741" timestamp="1589545104858" />
+    <state width="1253" height="169" key="GridCell.Tab.0.bottom" timestamp="1589658756299">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="561" y="216" width="374" height="361" key="FileChooserDialogImpl/67.27.1299.741@67.27.1299.741" timestamp="1580218855880" />
-    <state width="1253" height="262" key="GridCell.Tab.0.bottom" timestamp="1585732719184">
+    <state width="1253" height="169" key="GridCell.Tab.0.bottom/67.27.1299.741@67.27.1299.741" timestamp="1589658756299" />
+    <state width="1253" height="169" key="GridCell.Tab.0.center" timestamp="1589658756298">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="262" key="GridCell.Tab.0.bottom/67.27.1299.741@67.27.1299.741" timestamp="1585732719184" />
-    <state width="1253" height="262" key="GridCell.Tab.0.center" timestamp="1585732719183">
+    <state width="1253" height="169" key="GridCell.Tab.0.center/67.27.1299.741@67.27.1299.741" timestamp="1589658756298" />
+    <state width="1253" height="169" key="GridCell.Tab.0.left" timestamp="1589658756297">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="262" key="GridCell.Tab.0.center/67.27.1299.741@67.27.1299.741" timestamp="1585732719183" />
-    <state width="1253" height="262" key="GridCell.Tab.0.left" timestamp="1585732719182">
+    <state width="1253" height="169" key="GridCell.Tab.0.left/67.27.1299.741@67.27.1299.741" timestamp="1589658756297" />
+    <state width="1253" height="169" key="GridCell.Tab.0.right" timestamp="1589658756299">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="262" key="GridCell.Tab.0.left/67.27.1299.741@67.27.1299.741" timestamp="1585732719182" />
-    <state width="1253" height="262" key="GridCell.Tab.0.right" timestamp="1585732719183">
+    <state width="1253" height="169" key="GridCell.Tab.0.right/67.27.1299.741@67.27.1299.741" timestamp="1589658756298" />
+    <state width="1253" height="169" key="GridCell.Tab.1.bottom" timestamp="1589658756301">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="262" key="GridCell.Tab.0.right/67.27.1299.741@67.27.1299.741" timestamp="1585732719183" />
-    <state width="1253" height="262" key="GridCell.Tab.1.bottom" timestamp="1585732719186">
+    <state width="1253" height="169" key="GridCell.Tab.1.bottom/67.27.1299.741@67.27.1299.741" timestamp="1589658756301" />
+    <state width="1253" height="169" key="GridCell.Tab.1.center" timestamp="1589658756300">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="262" key="GridCell.Tab.1.bottom/67.27.1299.741@67.27.1299.741" timestamp="1585732719186" />
-    <state width="1253" height="262" key="GridCell.Tab.1.center" timestamp="1585732719185">
+    <state width="1253" height="169" key="GridCell.Tab.1.center/67.27.1299.741@67.27.1299.741" timestamp="1589658756300" />
+    <state width="1253" height="169" key="GridCell.Tab.1.left" timestamp="1589658756300">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="262" key="GridCell.Tab.1.center/67.27.1299.741@67.27.1299.741" timestamp="1585732719185" />
-    <state width="1253" height="262" key="GridCell.Tab.1.left" timestamp="1585732719184">
+    <state width="1253" height="169" key="GridCell.Tab.1.left/67.27.1299.741@67.27.1299.741" timestamp="1589658756300" />
+    <state width="1253" height="169" key="GridCell.Tab.1.right" timestamp="1589658756300">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="262" key="GridCell.Tab.1.left/67.27.1299.741@67.27.1299.741" timestamp="1585732719184" />
-    <state width="1253" height="262" key="GridCell.Tab.1.right" timestamp="1585732719185">
+    <state width="1253" height="169" key="GridCell.Tab.1.right/67.27.1299.741@67.27.1299.741" timestamp="1589658756300" />
+    <state x="523" y="333" width="377" height="126" key="ReplaceDuplicatesPrompt" timestamp="1588247221435">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="262" key="GridCell.Tab.1.right/67.27.1299.741@67.27.1299.741" timestamp="1585732719185" />
-    <state x="449" y="96" width="780" height="602" key="NewModule_or_Project.wizard" timestamp="1579706042686">
+    <state x="523" y="333" width="377" height="126" key="ReplaceDuplicatesPrompt/67.27.1299.741@67.27.1299.741" timestamp="1588247221435" />
+    <state width="649" height="371" key="XDebugger.FullValuePopup" timestamp="1589543311530">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="449" y="96" width="780" height="602" key="NewModule_or_Project.wizard/67.27.1299.741@67.27.1299.741" timestamp="1579706042686" />
-    <state x="493" y="137" width="436" height="519" key="RefactorJ.RemoveMiddleman" timestamp="1579857150974">
+    <state width="649" height="371" key="XDebugger.FullValuePopup/67.27.1299.741@67.27.1299.741" timestamp="1589543311530" />
+    <state x="67" y="127" width="1289" height="538" key="caller.chooser.dialog" timestamp="1589657728205">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="493" y="137" width="436" height="519" key="RefactorJ.RemoveMiddleman/67.27.1299.741@67.27.1299.741" timestamp="1579857150974" />
-    <state x="523" y="333" width="377" height="126" key="ReplaceDuplicatesPrompt" timestamp="1580287357153">
+    <state x="67" y="127" width="1289" height="538" key="caller.chooser.dialog/67.27.1299.741@67.27.1299.741" timestamp="1589657728205" />
+    <state x="370" y="27" width="683" height="741" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1589543370701">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="523" y="333" width="377" height="126" key="ReplaceDuplicatesPrompt/67.27.1299.741@67.27.1299.741" timestamp="1580287357153" />
-    <state x="332" y="27" width="1024" height="741" key="SettingsEditor" timestamp="1579706358018">
+    <state x="370" y="27" width="683" height="741" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/67.27.1299.741@67.27.1299.741" timestamp="1589543370701" />
+    <state x="449" y="149" width="568" height="501" key="extract.method.dialog" timestamp="1589539809146">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="332" y="27" width="1024" height="741" key="SettingsEditor/67.27.1299.741@67.27.1299.741" timestamp="1579706358018" />
-    <state width="649" height="371" key="XDebugger.FullValuePopup" timestamp="1580288843804">
+    <state x="449" y="149" width="568" height="501" key="extract.method.dialog/67.27.1299.741@67.27.1299.741" timestamp="1589539809146" />
+    <state x="467" y="114" width="869" height="602" key="find.popup" timestamp="1589660629868">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="649" height="371" key="XDebugger.FullValuePopup/67.27.1299.741@67.27.1299.741" timestamp="1580288843804" />
-    <state x="372" y="224" key="com.intellij.ide.util.TipDialog" timestamp="1579705396937">
+    <state x="467" y="114" width="869" height="602" key="find.popup/67.27.1299.741@67.27.1299.741" timestamp="1589660629868" />
+    <state x="503" y="128" width="598" height="507" key="refactoring.ChangeSignatureDialog" timestamp="1589541413564">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="372" y="224" key="com.intellij.ide.util.TipDialog/67.27.1299.741@67.27.1299.741" timestamp="1579705396937" />
-    <state x="380" y="69" width="662" height="655" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1580218285682">
+    <state x="503" y="128" width="598" height="507" key="refactoring.ChangeSignatureDialog/67.27.1299.741@67.27.1299.741" timestamp="1589541413564" />
+    <state x="379" y="89" width="672" height="678" key="search.everywhere.popup" timestamp="1589662508559">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="380" y="69" width="662" height="655" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/67.27.1299.741@67.27.1299.741" timestamp="1580218285682" />
-    <state x="449" y="149" width="568" height="501" key="extract.method.dialog" timestamp="1587622079615">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="449" y="149" width="568" height="501" key="extract.method.dialog/67.27.1299.741@67.27.1299.741" timestamp="1587622079615" />
-    <state x="467" y="114" width="869" height="602" key="find.popup" timestamp="1587650924920">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="467" y="114" width="869" height="602" key="find.popup/67.27.1299.741@67.27.1299.741" timestamp="1587650924920" />
-    <state x="232" y="116" width="1372" height="796" key="new project wizard" timestamp="1579706022324">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="232" y="116" key="new project wizard/67.27.1299.741@67.27.1299.741" timestamp="1579706022324" />
-    <state x="503" y="128" width="598" height="507" key="refactoring.ChangeSignatureDialog" timestamp="1587467011819">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="503" y="128" width="598" height="507" key="refactoring.ChangeSignatureDialog/67.27.1299.741@67.27.1299.741" timestamp="1587467011819" />
-    <state x="380" y="175" key="run.anything.popup" timestamp="1580207058847">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="380" y="175" key="run.anything.popup/67.27.1299.741@67.27.1299.741" timestamp="1580207058847" />
+    <state x="379" y="89" width="672" height="678" key="search.everywhere.popup/67.27.1299.741@67.27.1299.741" timestamp="1589662508559" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <condition expression="entity.getSimpleName().toString().equals(&quot;Nurse&quot;)" language="JAVA" />
-          <url>file://$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java</url>
-          <line>134</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <condition expression="arg.getValue() == null" language="JAVA" />
           <url>file://$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java</url>

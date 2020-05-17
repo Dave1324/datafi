@@ -518,16 +518,18 @@ public class DataManager<T> {
         return ids;
     }
 
-    public static final int DEFAULT_PAGE_SIZE = 25;
-    //explicit pagination with sort
     public Page<T> freeTextSearchBy(FreeTextSearchPageRequest request){
+        return freeTextSearchBy(request, -1);
+    }
+
+    public Page<T> freeTextSearchBy(FreeTextSearchPageRequest request, long totalCount){
         try{
             if(request.getSearchTerm() == null || request.getSearchTerm().equals(""))
                 throw new IllegalArgumentException(
                         "Illegal attempt to search for " + clazzSimpleNamePlural + " with null or blank string"
                 );
             DatafiStaticUtils.validateSortByIfNonNull(clazz, request.getSortBy(), reflectionCache);
-            Pageable paginator = DatafiStaticUtils.generatePageRequest(request);
+            Pageable paginator = DatafiStaticUtils.generatePageRequest(request, totalCount);
             Method methodToInvoke =
                     getMethodToInvoke("freeTextSearch", new Class<?>[]{String.class, Pageable.class}, dao);
             val result = (org.springframework.data.domain.Page) methodToInvoke
