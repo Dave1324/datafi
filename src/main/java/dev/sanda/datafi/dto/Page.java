@@ -12,10 +12,12 @@ public class Page<T> {
     private List<T> content;
     private Long totalPagesCount;
     private Long totalItemsCount;
+    private Integer pageNumber;
 
     public Page(org.springframework.data.domain.Page<T> page){
         content = page.getContent();
         totalPagesCount = (long) page.getTotalPages();
         totalItemsCount = page.getTotalElements();
+        pageNumber = page.getNumber();
     }
 }

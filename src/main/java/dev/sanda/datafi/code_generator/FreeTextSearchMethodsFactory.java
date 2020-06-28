@@ -81,13 +81,13 @@ public class FreeTextSearchMethodsFactory {
         for (String fieldName : searchFieldNames) {
             final String conditionPrefix = isFirst ? " WHERE" : " OR";
             isFirst = false;
-            final String condition = " lower(" + placeHolder + "." + fieldName + ") " +
+            val condition = " lower(" + placeHolder + "." + fieldName + ") " +
                     "LIKE lower(concat('%', :searchTerm, '%'))";
             result.append(conditionPrefix);
             result.append(condition);
-            if(isArchivable)
-                result.append(" AND ").append(placeHolder).append(".isArchived = false");
         }
+        if(isArchivable)
+            result.append(" AND ").append(placeHolder).append(".isArchived = false");
         return result.toString();
     }
 }

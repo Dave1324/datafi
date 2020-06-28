@@ -17,7 +17,10 @@ import org.springframework.data.domain.Sort;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.persistence.*;
@@ -70,6 +73,7 @@ public class DatafiStaticUtils {
         throw new RuntimeException("Cannot find " + simpleName + " by id: " + id);
     }
     public static<T> List<Object> getIdList(Collection<T> input, ReflectionCache reflectionCache) {
+        if(input.isEmpty()) return new ArrayList<>();
         final String clazzName = input.iterator().next().getClass().getSimpleName();
         final CachedEntityTypeInfo cachedEntityTypeInfo = reflectionCache.getEntitiesCache().get(clazzName);
         List<Object> ids = new ArrayList<>();

@@ -2,14 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedElementCollectionField.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedMapElementCollectionField.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/FreeTextSearchBy.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/FreeTextSearchByFields.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/WithFreeTextSearchByFields.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/WithFreeTextSearchByFields.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/WithFreeTextSearchByFields.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityTypeInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityTypeInfo.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" afterDir="false" />
     </list>
@@ -66,6 +67,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="TERMINAL_CUSTOM_COMMANDS_GOT_IT" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="Arquillian JUnit4" />
@@ -73,6 +75,7 @@
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5" value="" />
     <property name="extract.method.default.visibility" value="private" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -159,7 +162,35 @@
       <workItem from="1588709704467" duration="209000" />
       <workItem from="1588782346381" duration="1365000" />
       <workItem from="1589273848055" duration="59000" />
-      <workItem from="1589539529241" duration="12162000" />
+      <workItem from="1589539529241" duration="13115000" />
+      <workItem from="1589718950052" duration="1222000" />
+      <workItem from="1589742327215" duration="109000" />
+      <workItem from="1589742789109" duration="72000" />
+      <workItem from="1589743700053" duration="37000" />
+      <workItem from="1589809452973" duration="725000" />
+      <workItem from="1589898438990" duration="1162000" />
+      <workItem from="1589908125353" duration="879000" />
+      <workItem from="1590047125657" duration="1837000" />
+      <workItem from="1590049197927" duration="700000" />
+      <workItem from="1590307308943" duration="4870000" />
+      <workItem from="1590345768865" duration="925000" />
+      <workItem from="1590404616071" duration="914000" />
+      <workItem from="1590409699845" duration="597000" />
+      <workItem from="1590426317338" duration="25000" />
+      <workItem from="1590426517758" duration="38000" />
+      <workItem from="1591088027923" duration="653000" />
+      <workItem from="1591108168828" duration="31000" />
+      <workItem from="1591619318951" duration="415000" />
+      <workItem from="1591771765102" duration="512000" />
+      <workItem from="1592242848120" duration="98000" />
+      <workItem from="1592306842576" duration="161000" />
+      <workItem from="1592307050613" duration="44000" />
+      <workItem from="1593076699790" duration="2475000" />
+      <workItem from="1593319715422" duration="120000" />
+      <workItem from="1593319887497" duration="223000" />
+      <workItem from="1593321103589" duration="129000" />
+      <workItem from="1593321502635" duration="444000" />
+      <workItem from="1593321964128" duration="312000" />
     </task>
     <servers />
   </component>
@@ -195,38 +226,38 @@
       <screen x="67" y="27" width="1299" height="741" />
     </state>
     <state width="614" height="466" key="DebuggerActiveHint/67.27.1299.741@67.27.1299.741" timestamp="1589545104858" />
-    <state width="1253" height="169" key="GridCell.Tab.0.bottom" timestamp="1589658756299">
+    <state width="1253" height="169" key="GridCell.Tab.0.bottom" timestamp="1589718890513">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="169" key="GridCell.Tab.0.bottom/67.27.1299.741@67.27.1299.741" timestamp="1589658756299" />
-    <state width="1253" height="169" key="GridCell.Tab.0.center" timestamp="1589658756298">
+    <state width="1253" height="169" key="GridCell.Tab.0.bottom/67.27.1299.741@67.27.1299.741" timestamp="1589718890513" />
+    <state width="1253" height="169" key="GridCell.Tab.0.center" timestamp="1589718890512">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="169" key="GridCell.Tab.0.center/67.27.1299.741@67.27.1299.741" timestamp="1589658756298" />
-    <state width="1253" height="169" key="GridCell.Tab.0.left" timestamp="1589658756297">
+    <state width="1253" height="169" key="GridCell.Tab.0.center/67.27.1299.741@67.27.1299.741" timestamp="1589718890512" />
+    <state width="1253" height="169" key="GridCell.Tab.0.left" timestamp="1589718890512">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="169" key="GridCell.Tab.0.left/67.27.1299.741@67.27.1299.741" timestamp="1589658756297" />
-    <state width="1253" height="169" key="GridCell.Tab.0.right" timestamp="1589658756299">
+    <state width="1253" height="169" key="GridCell.Tab.0.left/67.27.1299.741@67.27.1299.741" timestamp="1589718890512" />
+    <state width="1253" height="169" key="GridCell.Tab.0.right" timestamp="1589718890512">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="169" key="GridCell.Tab.0.right/67.27.1299.741@67.27.1299.741" timestamp="1589658756298" />
-    <state width="1253" height="169" key="GridCell.Tab.1.bottom" timestamp="1589658756301">
+    <state width="1253" height="169" key="GridCell.Tab.0.right/67.27.1299.741@67.27.1299.741" timestamp="1589718890512" />
+    <state width="1253" height="169" key="GridCell.Tab.1.bottom" timestamp="1589718890514">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="169" key="GridCell.Tab.1.bottom/67.27.1299.741@67.27.1299.741" timestamp="1589658756301" />
-    <state width="1253" height="169" key="GridCell.Tab.1.center" timestamp="1589658756300">
+    <state width="1253" height="169" key="GridCell.Tab.1.bottom/67.27.1299.741@67.27.1299.741" timestamp="1589718890514" />
+    <state width="1253" height="169" key="GridCell.Tab.1.center" timestamp="1589718890513">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="169" key="GridCell.Tab.1.center/67.27.1299.741@67.27.1299.741" timestamp="1589658756300" />
-    <state width="1253" height="169" key="GridCell.Tab.1.left" timestamp="1589658756300">
+    <state width="1253" height="169" key="GridCell.Tab.1.center/67.27.1299.741@67.27.1299.741" timestamp="1589718890513" />
+    <state width="1253" height="169" key="GridCell.Tab.1.left" timestamp="1589718890513">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="169" key="GridCell.Tab.1.left/67.27.1299.741@67.27.1299.741" timestamp="1589658756300" />
-    <state width="1253" height="169" key="GridCell.Tab.1.right" timestamp="1589658756300">
+    <state width="1253" height="169" key="GridCell.Tab.1.left/67.27.1299.741@67.27.1299.741" timestamp="1589718890513" />
+    <state width="1253" height="169" key="GridCell.Tab.1.right" timestamp="1589718890513">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state width="1253" height="169" key="GridCell.Tab.1.right/67.27.1299.741@67.27.1299.741" timestamp="1589658756300" />
+    <state width="1253" height="169" key="GridCell.Tab.1.right/67.27.1299.741@67.27.1299.741" timestamp="1589718890513" />
     <state x="523" y="333" width="377" height="126" key="ReplaceDuplicatesPrompt" timestamp="1588247221435">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
@@ -243,18 +274,22 @@
       <screen x="67" y="27" width="1299" height="741" />
     </state>
     <state x="370" y="27" width="683" height="741" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/67.27.1299.741@67.27.1299.741" timestamp="1589543370701" />
-    <state x="449" y="149" width="568" height="501" key="extract.method.dialog" timestamp="1589539809146">
+    <state x="449" y="149" width="568" height="501" key="extract.method.dialog" timestamp="1591772075124">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="449" y="149" width="568" height="501" key="extract.method.dialog/67.27.1299.741@67.27.1299.741" timestamp="1589539809146" />
-    <state x="467" y="114" width="869" height="602" key="find.popup" timestamp="1589660629868">
+    <state x="449" y="149" width="568" height="501" key="extract.method.dialog/67.27.1299.741@67.27.1299.741" timestamp="1591772075124" />
+    <state x="467" y="114" width="869" height="602" key="find.popup" timestamp="1592306997678">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="467" y="114" width="869" height="602" key="find.popup/67.27.1299.741@67.27.1299.741" timestamp="1589660629868" />
-    <state x="503" y="128" width="598" height="507" key="refactoring.ChangeSignatureDialog" timestamp="1589541413564">
+    <state x="467" y="114" width="869" height="602" key="find.popup/67.27.1299.741@67.27.1299.741" timestamp="1592306997678" />
+    <state x="67" y="100" width="1289" height="592" key="new project wizard" timestamp="1593076868252">
       <screen x="67" y="27" width="1299" height="741" />
     </state>
-    <state x="503" y="128" width="598" height="507" key="refactoring.ChangeSignatureDialog/67.27.1299.741@67.27.1299.741" timestamp="1589541413564" />
+    <state x="67" y="100" width="1289" height="592" key="new project wizard/67.27.1299.741@67.27.1299.741" timestamp="1593076868252" />
+    <state x="503" y="128" width="598" height="507" key="refactoring.ChangeSignatureDialog" timestamp="1590346058891">
+      <screen x="67" y="27" width="1299" height="741" />
+    </state>
+    <state x="503" y="128" width="598" height="507" key="refactoring.ChangeSignatureDialog/67.27.1299.741@67.27.1299.741" timestamp="1590346058891" />
     <state x="379" y="89" width="672" height="678" key="search.everywhere.popup" timestamp="1589662508559">
       <screen x="67" y="27" width="1299" height="741" />
     </state>

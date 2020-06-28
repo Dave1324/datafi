@@ -1,6 +1,5 @@
 package dev.sanda.datafi.reflection;
 
-import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatable;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatables;
 import dev.sanda.datafi.annotations.attributes.NonNullable;
@@ -21,6 +20,9 @@ public class CachedEntityTypeInfo {
 
     private Field idField;
 
+    private Map<String, CachedElementCollectionField> elementCollections;
+    private Map<String, CachedMapElementCollectionField> mapElementCollections;
+
     private Class<?> clazz;
     private Object defaultInstance;
     private Map<String, CachedEntityField> fields;
@@ -32,23 +34,34 @@ public class CachedEntityTypeInfo {
 
     public CachedEntityTypeInfo(Class<?> clazz, Collection<Field> fields, Collection<Method> publicMethods) {
         sortKeys = new HashSet<>();
+        elementCollections = new HashMap<>();
+        mapElementCollections = new HashMap<>();
         this.clazz = clazz;
         if(Archivable.class.isAssignableFrom(clazz)) isArchivable = true;
         this.fields = new HashMap<>();
         fields.forEach(field -> {
+            field.setAccessible(true);
             boolean isCollectionOrMap = isCollectionOrMap(field);
             boolean isNonApiUpdatable = isNonApiUpdatable(field);
             boolean isNonNullable = isNonNullableField(field);
+            val fieldName = field.getName();
             if(isEmbeddedOrForeignKey(field))
-                addNestedSortKeys(field, field.getName() + ".", new Stack<>());
+                addNestedSortKeys(field, fieldName + ".", new Stack<>());
             this.fields.put(
-                    field.getName(),
+                    fieldName,
                     new CachedEntityField(field, isCollectionOrMap, isNonApiUpdatable, isNonNullable)
             );
-            sortKeys.add(field.getName());
+            sortKeys.add(fieldName);
             if(field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
                 this.idField = field;
-                this.idField.setAccessible(true);
+            }
+            if(field.isAnnotationPresent(ElementCollection.class)){
+                val fieldType = field.getType();
+                if(Map.class.isAssignableFrom(fieldType)){
+                    mapElementCollections.put(fieldName, new CachedMapElementCollectionField(field));
+                }else if(Collection.class.isAssignableFrom(fieldType)) {
+                    elementCollections.put(fieldName, new CachedElementCollectionField(field));
+                }
             }
         });
         this.publicMethods = new HashMap<>();
@@ -77,22 +90,6 @@ public class CachedEntityTypeInfo {
             sortKeys.add(fieldName);
         });
         typesSoFar.pop();
-    }
-
-    public Object invokeGetter(Object instance, String fieldName){
-        try {
-            return publicMethods.get("get" + DatafiStaticUtils.toPascalCase(fieldName)).invoke(instance);
-        } catch (Exception e){
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void invokeSetter(Object instance, String fieldName, Object value){
-        try {
-            publicMethods.get("set" + DatafiStaticUtils.toPascalCase(fieldName)).invoke(instance, value);
-        } catch (Exception e){
-            throw new RuntimeException(e);
-        }
     }
 
     private boolean isNonApiUpdatable(Field field) {
@@ -153,5 +150,9 @@ public class CachedEntityTypeInfo {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void addAllToElementCollection(String fieldName, Object instance, Collection<Object> toAdd){
+
     }
 }
