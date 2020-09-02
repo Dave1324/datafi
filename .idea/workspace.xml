@@ -2,17 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedElementCollectionField.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedMapElementCollectionField.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/ElementCollectionTypeResolver.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/WithFreeTextSearchByFields.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/free_text_search/WithFreeTextSearchByFields.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityTypeInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityTypeInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -191,6 +182,9 @@
       <workItem from="1593321103589" duration="129000" />
       <workItem from="1593321502635" duration="444000" />
       <workItem from="1593321964128" duration="312000" />
+      <workItem from="1593322388419" duration="186000" />
+      <workItem from="1594132824686" duration="599000" />
+      <workItem from="1597399309343" duration="1142000" />
     </task>
     <servers />
   </component>

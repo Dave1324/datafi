@@ -454,12 +454,12 @@ public class DataManager<T> {
             try {
                 currentField.setAccessible(true);
                 Object sourceFieldValue = currentField.get(source);
-                Object targetFieldValue = currentField.get(toUpdate);
                 //if field value is null, there's nothing to update to
                 if(sourceFieldValue == null) continue;
                 //if field is an embedded entity, we need to recursively update all of its fields
-                if(isForeignKey(currentField, toUpdate))
-                    cascadeUpdateImpl(targetFieldValue, sourceFieldValue);
+                if(isForeignKey(currentField, toUpdate)) {
+                    cascadeUpdateImpl(currentField.get(toUpdate), sourceFieldValue);
+                }
                 //if field is a foreign key collection, that's outside of this use case
                 else if(!isForeignKeyCollection(currentField))
                     //else, (...finally) update field value

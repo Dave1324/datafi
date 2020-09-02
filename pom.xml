@@ -17,7 +17,7 @@
     </parent>
 
     <artifactId>datafi</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.5.1</version>
 
     <dependencies>
         <dependency>
