@@ -11,6 +11,8 @@ import dev.sanda.datafi.reflection.ReflectionCache;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.LazyInitializer;
 import org.springframework.aop.framework.Advised;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -74,7 +76,8 @@ public class DatafiStaticUtils {
     }
     public static<T> List<Object> getIdList(Collection<T> input, ReflectionCache reflectionCache) {
         if(input.isEmpty()) return new ArrayList<>();
-        final String clazzName = input.iterator().next().getClass().getSimpleName();
+        T firstItem = deProxify(input.iterator().next());
+        final String clazzName = firstItem.getClass().getSimpleName();
         final CachedEntityTypeInfo cachedEntityTypeInfo = reflectionCache.getEntitiesCache().get(clazzName);
         List<Object> ids = new ArrayList<>();
         input.forEach(item -> ids.add(cachedEntityTypeInfo.getId(item)));
@@ -234,7 +237,19 @@ public class DatafiStaticUtils {
     }
 
     public static <T> Object getId(T input, ReflectionCache reflectionCache) {
-        return reflectionCache.getIdOf(input.getClass().getSimpleName(), input);
+        return reflectionCache.getIdOf(deProxify(input).getClass().getSimpleName(), input);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T deProxify(Object possibleProxy){
+        Object result = possibleProxy;
+        if(possibleProxy instanceof HibernateProxy) {
+            HibernateProxy hibernateProxy = (HibernateProxy) possibleProxy;
+            LazyInitializer initializer =
+                    hibernateProxy.getHibernateLazyInitializer();
+            result = initializer.getImplementation();
+        }
+        return (T) result;
     }
 
     public static boolean isArchivable(TypeElement entity, ProcessingEnvironment processingEnv){
