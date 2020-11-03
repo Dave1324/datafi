@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/aws.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,7 +78,7 @@
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.Arquillian JUnit4" value="" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5" value="" />
     <property name="extract.method.default.visibility" value="private" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../living-tanach-project/backend" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="project.structure.last.edited" value="SDKs" />
     <property name="project.structure.proportion" value="0.15" />
@@ -114,17 +112,6 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="mvnDebug1" type="Remote">
       <module name="datafi" />
       <option name="USE_SOCKET_TRANSPORT" value="true" />
@@ -215,7 +202,15 @@
       <workItem from="1597399309343" duration="1142000" />
       <workItem from="1601641240245" duration="1922000" />
       <workItem from="1601881654078" duration="109000" />
-      <workItem from="1603805676245" duration="798000" />
+      <workItem from="1603805676245" duration="1019000" />
+      <workItem from="1603996134408" duration="316000" />
+      <workItem from="1603996459192" duration="1274000" />
+      <workItem from="1604046144922" duration="599000" />
+      <workItem from="1604053299952" duration="607000" />
+      <workItem from="1604054630165" duration="2579000" />
+      <workItem from="1604231895438" duration="599000" />
+      <workItem from="1604320868955" duration="1006000" />
+      <workItem from="1604338094360" duration="1888000" />
     </task>
     <servers />
   </component>
@@ -235,18 +230,14 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="779" y="314" width="424" height="491" key="FileChooserDialogImpl" timestamp="1601642074860">
+    <state x="779" y="314" width="424" height="491" key="FileChooserDialogImpl" timestamp="1604321275018">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
-    <state x="779" y="314" width="424" height="491" key="FileChooserDialogImpl/72.27.1848.1053@72.27.1848.1053" timestamp="1601642074860" />
+    <state x="779" y="314" width="424" height="491" key="FileChooserDialogImpl/72.27.1848.1053@72.27.1848.1053" timestamp="1604321275018" />
     <state x="485" y="188" width="1022" height="737" key="SettingsEditor" timestamp="1601642138036">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="485" y="188" width="1022" height="737" key="SettingsEditor/72.27.1848.1053@72.27.1848.1053" timestamp="1601642138036" />
-    <state x="67" y="100" width="1289" height="592" key="new project wizard" timestamp="1593076868252">
-      <screen x="67" y="27" width="1299" height="741" />
-    </state>
-    <state x="67" y="100" width="1289" height="592" key="new project wizard/67.27.1299.741@67.27.1299.741" timestamp="1593076868252" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

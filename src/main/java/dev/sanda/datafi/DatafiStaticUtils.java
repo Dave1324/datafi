@@ -74,13 +74,16 @@ public class DatafiStaticUtils {
     public static void throwEntityNotFoundException(String simpleName, Object id){
         throw new RuntimeException("Cannot find " + simpleName + " by id: " + id);
     }
+
+    @SuppressWarnings("unchecked")
     public static<T> List<Object> getIdList(Collection<T> input, ReflectionCache reflectionCache) {
         if(input.isEmpty()) return new ArrayList<>();
-        T firstItem = deProxify(input.iterator().next());
+        Collection<T> deproxifiedInput = (Collection<T>)input.stream().map(DatafiStaticUtils::deProxify).collect(Collectors.toSet());
+        T firstItem = deproxifiedInput.iterator().next();
         final String clazzName = firstItem.getClass().getSimpleName();
         final CachedEntityTypeInfo cachedEntityTypeInfo = reflectionCache.getEntitiesCache().get(clazzName);
         List<Object> ids = new ArrayList<>();
-        input.forEach(item -> ids.add(cachedEntityTypeInfo.getId(item)));
+        deproxifiedInput.forEach(item -> ids.add(cachedEntityTypeInfo.getId(item)));
         return ids;
     }
 
@@ -237,7 +240,8 @@ public class DatafiStaticUtils {
     }
 
     public static <T> Object getId(T input, ReflectionCache reflectionCache) {
-        return reflectionCache.getIdOf(deProxify(input).getClass().getSimpleName(), input);
+        final Object instance = deProxify(input);
+        return reflectionCache.getIdOf(instance.getClass().getSimpleName(), instance);
     }
 
     @SuppressWarnings("unchecked")
