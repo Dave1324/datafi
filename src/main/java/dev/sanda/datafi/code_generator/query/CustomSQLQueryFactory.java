@@ -41,11 +41,11 @@ public class CustomSQLQueryFactory {
         Map<TypeElement, List<MethodSpec>> customQueriesMap = new HashMap<>();
         for (TypeElement entity : entities) {
             List<CustomSQLQuery> customQueries = getCustomSQLQueries(entity);
-                List<MethodSpec> customQuerieMethodSpecs = new ArrayList<>();
-                for (CustomSQLQuery query : customQueries) {
-                    customQuerieMethodSpecs.add(generateCustomQueryMethod(query));
-                }
-                customQueriesMap.put(entity, customQuerieMethodSpecs);
+            List<MethodSpec> customQuerieMethodSpecs = new ArrayList<>();
+            for (CustomSQLQuery query : customQueries) {
+                customQuerieMethodSpecs.add(generateCustomQueryMethod(query));
+            }
+            customQueriesMap.put(entity, customQuerieMethodSpecs);
         }
         return customQueriesMap;
     }
@@ -53,9 +53,9 @@ public class CustomSQLQueryFactory {
     private MethodSpec generateCustomQueryMethod(CustomSQLQuery query) {
         AnnotationSpec.Builder queryAnnotationBuilder = AnnotationSpec.builder(Query.class)
                 .addMember("value", "$S", query.getSql());
-        if(query.isNative())
+        if (query.isNative())
             queryAnnotationBuilder.addMember("nativeQuery", "$L", true);
-        return   MethodSpec.methodBuilder(query.getName())
+        return MethodSpec.methodBuilder(query.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(queryAnnotationBuilder.build())
                 .addParameters(query.parameterSpecs())
@@ -71,25 +71,25 @@ public class CustomSQLQueryFactory {
         final WithNativeQueryScripts nativeQueryScripts = entity.getAnnotation(WithNativeQueryScripts.class);
         List<CustomSQLQuery> customSQLQueries = new ArrayList<>();
 
-        if(individualQueries != null){
+        if (individualQueries != null) {
             for (WithQuery query : individualQueries) {
                 customSQLQueries.add(parseQuery(query.name(), query.jpql(), entity));
             }
         }
 
-        if(individualNativeQueries != null){
+        if (individualNativeQueries != null) {
             for (WithNativeQuery query : individualNativeQueries) {
                 customSQLQueries.add(parseIndividualNativeQuery(query.name(), query.sql(), entity));
             }
         }
 
-        if(queryScripts != null){
+        if (queryScripts != null) {
             for (String scriptPath : queryScripts.value()) {
                 customSQLQueries.add(parseQueryScript(scriptPath, entity));
             }
         }
 
-        if(nativeQueryScripts != null){
+        if (nativeQueryScripts != null) {
             for (String scriptPath : nativeQueryScripts.value()) {
                 customSQLQueries.add(parseQueryScript(scriptPath, entity));
             }
@@ -113,8 +113,8 @@ public class CustomSQLQueryFactory {
     }
 
     private boolean determineIfIsNativeQuery(String path) {
-        if(path.endsWith(".sql")) return true;
-        if(path.endsWith(".jpql")) return false;
+        if (path.endsWith(".sql")) return true;
+        if (path.endsWith(".jpql")) return false;
         else {
             compilationFailureWithMessage(String.format("Invalid query script path: %s; Paths must end with either a .sql or a .jpql suffix", path), env);
             return false;
@@ -141,8 +141,8 @@ public class CustomSQLQueryFactory {
         final String[] sql = sqlString.toUpperCase().split(" ");
         boolean isUnique =
                 (sql[sql.length - 2] + " " + sql[sql.length - 1]).equals("LIMIT 1") ||
-                sql[0].equals("INSERT") ||
-                sql[0].equals("REPLACE");
+                        sql[0].equals("INSERT") ||
+                        sql[0].equals("REPLACE");
         return isUnique ? ReturnPlurality.SINGLE : ReturnPlurality.BATCH;
     }
 
@@ -150,17 +150,17 @@ public class CustomSQLQueryFactory {
         String lineSeparator = System.getProperty("line.separator");
         String formattedSqlString =
                 sql
-                .replaceAll(lineSeparator, " ")
-                .replaceAll("\\s+", " ")
-                .trim();
+                        .replaceAll(lineSeparator, " ")
+                        .replaceAll("\\s+", " ")
+                        .trim();
         String[] lexemes = formattedSqlString.split(" ");
         StringBuilder finalSql = new StringBuilder();
         Map.Entry<String, TypeName> arg;
         for (String lexeme : lexemes) {
-            if((arg = parseLexemeForArg(lexeme, args, entitiesFields.get(entity))) != null) {
+            if ((arg = parseLexemeForArg(lexeme, args, entitiesFields.get(entity))) != null) {
                 args.putIfAbsent(arg.getKey(), arg.getValue());
                 finalSql.append(" :").append(arg.getKey());
-            }else{
+            } else {
                 finalSql.append(" ").append(lexeme);
             }
         }
@@ -171,30 +171,30 @@ public class CustomSQLQueryFactory {
             String lexeme,
             Map<String, TypeName> argsSoFar,
             Map<String, TypeName> entityFields) {
-        if(!lexeme.contains(":")) return null;
-        if(lexeme.contains(":::")){
+        if (!lexeme.contains(":")) return null;
+        if (lexeme.contains(":::")) {
             compilationFailureWithMessage(
                     lexeme + " contains more than two colons, " +
                             "must be either two or one for valid arg syntax.", env);
         }
         val argName = lexeme.substring(lexeme.lastIndexOf(":") + 1).replaceAll("'", "");
         TypeName argType;
-        if(lexeme.contains("::")){
-            if(argsSoFar.containsKey(argName)){
+        if (lexeme.contains("::")) {
+            if (argsSoFar.containsKey(argName)) {
                 compilationFailureWithMessage("sql argument name collision: " + argName, env);
             }
             String typeNameString = lexeme.substring(0, lexeme.indexOf(":"));
             argType = resolvePrimitiveType(typeNameString);
-            if(argType == null){
+            if (argType == null) {
                 compilationFailureWithMessage(
                         "cannot resolve type " + typeNameString +
                                 " for sql argument " + argName, env);
             }
-        }else {
+        } else {
             argType = entityFields.get(argName);
-            if(argType == null)
+            if (argType == null)
                 argType = argsSoFar.get(argName);
-            if(argType == null) {
+            if (argType == null) {
                 compilationFailureWithMessage(
                         lexeme + " is invalid syntax; must either " +
                                 "specify type with double colon syntax or " +
@@ -207,48 +207,59 @@ public class CustomSQLQueryFactory {
     private TypeName resolvePrimitiveType(String typeNameString) {
         Class<?> argClazz;
         boolean isList = typeNameString.endsWith("[]");
-        if(isList) typeNameString = typeNameString.substring(0, typeNameString.indexOf("["));
-        switch (typeNameString){
+        if (isList) typeNameString = typeNameString.substring(0, typeNameString.indexOf("["));
+        switch (typeNameString) {
             case "byte":
             case "Byte":
-                argClazz = Byte.class; break;
+                argClazz = Byte.class;
+                break;
             case "short":
             case "Short":
-                argClazz = Short.class; break;
+                argClazz = Short.class;
+                break;
             case "int":
             case "Integer":
-                argClazz = Integer.class; break;
+                argClazz = Integer.class;
+                break;
             case "long":
             case "Long":
-                argClazz = Long.class; break;
+                argClazz = Long.class;
+                break;
             case "float":
             case "Float":
-                argClazz = Float.class; break;
+                argClazz = Float.class;
+                break;
             case "double":
             case "Double":
-                argClazz = Double.class; break;
+                argClazz = Double.class;
+                break;
             case "boolean":
             case "Boolean":
-                argClazz = Boolean.class; break;
+                argClazz = Boolean.class;
+                break;
             case "char":
             case "Character":
-                argClazz = Character.class; break;
-            case "String": argClazz = String.class; break;
-            default: return null;
+                argClazz = Character.class;
+                break;
+            case "String":
+                argClazz = String.class;
+                break;
+            default:
+                return null;
         }
-        if(isList)
+        if (isList)
             return ParameterizedTypeName.get(List.class, argClazz);
         else
             return TypeName.get(argClazz);
     }
 
     private String formatAndValidateName(String name) {
-        if(name.contains("/"))
+        if (name.contains("/"))
             name = name.substring(name.lastIndexOf("/") + 1);
         name = name.trim();
-        if(name.endsWith(".sql")) name = name.substring(0, name.indexOf(".sql"));
-        if(name.endsWith(".jpql")) name = name.substring(0, name.indexOf(".jpql"));
-        if(!isValidJavaIdentifier(name)){
+        if (name.endsWith(".sql")) name = name.substring(0, name.indexOf(".sql"));
+        if (name.endsWith(".jpql")) name = name.substring(0, name.indexOf(".jpql"));
+        if (!isValidJavaIdentifier(name)) {
             compilationFailureWithMessage(invalidNameMessage(name), env);
         }
         return name;
@@ -273,14 +284,14 @@ public class CustomSQLQueryFactory {
         return true;
     }
 
-    private static String invalidNameMessage(String name){
+    private static String invalidNameMessage(String name) {
         return name + " is not a valid java identifier. please verify that all names " +
                 "given to custom sql queries are valid java identifiers.";
     }
 
     private static Map<String, TypeName> resolveFieldTypesOf(TypeElement typeElement) {
         Map<String, TypeName> result = new HashMap<>();
-        for(Element field : typeElement.getEnclosedElements())
+        for (Element field : typeElement.getEnclosedElements())
             if (field.getKind().isField())
                 result.put(field.getSimpleName().toString(), ClassName.get(field.asType()));
         return result;
@@ -289,7 +300,7 @@ public class CustomSQLQueryFactory {
     private String sqlResourceToString(String resourcePath) {
         try {
             FileObject sqlFileObject = env.getFiler()
-                    .getResource( StandardLocation.CLASS_OUTPUT, "", resourcePath );
+                    .getResource(StandardLocation.CLASS_OUTPUT, "", resourcePath);
             InputStream sqlFileStream = sqlFileObject.openInputStream();
             String raw = FileCopyUtils.copyToString(new InputStreamReader(sqlFileStream));
             Pattern commentPattern = Pattern.compile("(?:/\\*[^;]*?\\*/)|(?:--[^;]*?$)", Pattern.DOTALL | Pattern.MULTILINE);

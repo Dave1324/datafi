@@ -1,4 +1,4 @@
-package dev.sanda.datafi.reflection;
+package dev.sanda.datafi.reflection.cached_type_info;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,18 +14,18 @@ public class CachedElementCollectionField {
 
     private Field field;
 
-    public void addAll(Object ownerInstance, Collection toAdd){
+    public void addAll(Object ownerInstance, Collection toAdd) {
         try {
-            val fieldValue = (Collection)field.get(ownerInstance);
+            val fieldValue = (Collection) field.get(ownerInstance);
             fieldValue.addAll(toAdd);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void removeAll(Object ownerInstance, Collection toRemove){
+    public void removeAll(Object ownerInstance, Collection toRemove) {
         try {
-            val fieldValue = (Collection)field.get(ownerInstance);
+            val fieldValue = (Collection) field.get(ownerInstance);
             fieldValue.removeAll(toRemove);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);

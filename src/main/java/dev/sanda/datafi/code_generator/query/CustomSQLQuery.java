@@ -21,12 +21,13 @@ public class CustomSQLQuery {
 
     public TypeName returnSignature() {
         TypeName returnType = isDtoReturnType() ? resolveDtoType() : ClassName.get(annotatedEntity);
-        switch (returnPlurality){
+        switch (returnPlurality) {
             case SINGLE:
                 return returnType;
             case BATCH:
                 return ParameterizedTypeName.get(ClassName.get(List.class), returnType);
-            default: return null;
+            default:
+                return null;
         }
     }
 

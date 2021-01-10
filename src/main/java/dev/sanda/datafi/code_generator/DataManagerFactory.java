@@ -26,15 +26,15 @@ public class DataManagerFactory {
     private TypeSpec.Builder dataManagersConfig = initDataManagerConfig();
     private final static ClassName dataManagerType = ClassName.get(DataManager.class);
 
-    public void addDataManager(TypeElement entity){
+    public void addDataManager(TypeElement entity) {
         final ClassName entityType = ClassName.get(entity);
         MethodSpec.Builder builder =
                 MethodSpec
-                .methodBuilder(DatafiStaticUtils.camelCaseNameOf(entity) + "DataManager")
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Bean.class)
-                .returns(ParameterizedTypeName.get(dataManagerType, entityType))
-                .addStatement("return new $T($T.class)", dataManagerType, entityType);
+                        .methodBuilder(DatafiStaticUtils.camelCaseNameOf(entity) + "DataManager")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Bean.class)
+                        .returns(ParameterizedTypeName.get(dataManagerType, entityType))
+                        .addStatement("return new $T($T.class)", dataManagerType, entityType);
         dataManagersConfig.addMethod(builder.build());
     }
 
@@ -47,7 +47,7 @@ public class DataManagerFactory {
                 .build());
     }
 
-    private static TypeSpec.Builder initDataManagerConfig(){
+    private static TypeSpec.Builder initDataManagerConfig() {
         return TypeSpec.classBuilder("DataManagersConfig")
                 .addAnnotation(Configuration.class)
                 .addMethod(MethodSpec.methodBuilder("nullTypeDataManager")
@@ -58,7 +58,8 @@ public class DataManagerFactory {
                         .addStatement("return new $T()", dataManagerType)
                         .build());
     }
-    public void writeToFile(){
+
+    public void writeToFile() {
         DatafiStaticUtils.writeToJavaFile(
                 "DataManagersConfig",
                 basePackage,

@@ -21,25 +21,25 @@ public class FindByFieldsResolver {
 
     public Map<TypeElement, List<VariableElement>> annotatedFieldsMap(Set<? extends TypeElement> entities) {
         Map<TypeElement, List<VariableElement>> result = new HashMap<>();
-        for(TypeElement entity : entities){
+        for (TypeElement entity : entities) {
             List<VariableElement> annotatedFields = new ArrayList<>();
             entity
                     .getEnclosedElements().stream().filter(e -> e.getKind().isField())
                     .forEach(field -> {
-                        if(hasFindByAnnotation(field)){
+                        if (hasFindByAnnotation(field)) {
                             annotatedFields.add((VariableElement) field);
                         }
                     });
-            if(!annotatedFields.isEmpty())
+            if (!annotatedFields.isEmpty())
                 result.put(entity, annotatedFields);
         }
         return result;
     }
 
-    private boolean hasFindByAnnotation(Element element){
+    private boolean hasFindByAnnotation(Element element) {
         return
                 isDirectlyOrIndirectlyAnnotatedAs(element, FindBy.class) ||
-                isDirectlyOrIndirectlyAnnotatedAs(element, FindAllBy.class) ||
-                isDirectlyOrIndirectlyAnnotatedAs(element, FindByUnique.class);
+                        isDirectlyOrIndirectlyAnnotatedAs(element, FindAllBy.class) ||
+                        isDirectlyOrIndirectlyAnnotatedAs(element, FindByUnique.class);
     }
 }

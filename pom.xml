@@ -12,12 +12,12 @@
     <parent>
         <groupId>dev.sanda</groupId>
         <artifactId>Sensei</artifactId>
-        <version>0.0.4.1</version>
+        <version>0.1.0</version>
         <relativePath/>
     </parent>
 
     <artifactId>datafi</artifactId>
-    <version>0.0.5.3</version>
+    <version>0.1.0.BETA</version>
 
     <dependencies>
         <dependency>

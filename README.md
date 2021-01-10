@@ -49,7 +49,7 @@ Datafi is available on maven central:
 <dependency>  
 	 <groupId>dev.sanda</groupId> 
 	 <artifactId>datafi</artifactId> 
-	 <version>0.0.3</version>
+	 <version>0.1.0.BETA</version>
 </dependency>  
 ```  
   

@@ -29,10 +29,12 @@ import static dev.sanda.datafi.DatafiStaticUtils.isDirectlyOrIndirectlyAnnotated
 public class DaoFactory {
     @NonNull
     private ProcessingEnvironment processingEnv;
+
     /**
      * generate the actual '<entity name>Dao.java' jpa repository for a given entity
-     * @param entity - the given data model entity / table
-     * @param annotatedFieldsMap - a reference telling us whether this repository needs any custom
+     *
+     * @param entity              - the given data model entity / table
+     * @param annotatedFieldsMap  - a reference telling us whether this repository needs any custom
      * @param customSQLQueriesMap
      */
     protected void generateDao(
@@ -52,20 +54,21 @@ public class DaoFactory {
                 .addAnnotation(Repository.class)
                 .addSuperinterface(get(ClassName.get(GenericDao.class), DatafiStaticUtils.getIdType(entity, processingEnv), ClassName.get(entity)));
         Collection<VariableElement> annotatedFields = annotatedFieldsMap.get(entity);
-        if(annotatedFields != null)
+        if (annotatedFields != null)
             annotatedFields.forEach(annotatedField -> handleAnnotatedField(entity, builder, annotatedField));
-        if(customSQLQueriesMap.get(entity) != null)
+        if (customSQLQueriesMap.get(entity) != null)
             customSQLQueriesMap.get(entity).forEach(builder::addMethod);
-        if(freeTextSearchMethods.get(entity) != null)
+        if (freeTextSearchMethods.get(entity) != null)
             builder.addMethod(freeTextSearchMethods.get(entity));
         DatafiStaticUtils.writeToJavaFile(entity.getSimpleName().toString(), packageName, builder, processingEnv, "JpaRepository");
     }
+
     private void handleAnnotatedField(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
-        if(isFindBy(annotatedField))
+        if (isFindBy(annotatedField))
             handleFindBy(entity, builder, annotatedField);
-        if(isFindAllBy(annotatedField))
+        if (isFindAllBy(annotatedField))
             handleFindAllBy(entity, builder, annotatedField);
-        if(isFindByUnique(annotatedField))
+        if (isFindByUnique(annotatedField))
             handleFindByUnique(entity, builder, annotatedField);
     }
 
@@ -82,12 +85,11 @@ public class DaoFactory {
     }
 
     private void handleFindByUnique(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
-        if(isFindBy(annotatedField)){
+        if (isFindBy(annotatedField)) {
             DatafiStaticUtils.logCompilationError(processingEnv, annotatedField, "@FindBy and @FindByUnique cannot by definition be used together");
-        }else if(annotatedField.getAnnotation(Column.class) == null || !annotatedField.getAnnotation(Column.class).unique()){
+        } else if (annotatedField.getAnnotation(Column.class) == null || !annotatedField.getAnnotation(Column.class).unique()) {
             DatafiStaticUtils.logCompilationError(processingEnv, annotatedField, "In order to use @FindByUnique on a field, annotate the field as @Column(unique = true)");
-        }
-        else {
+        } else {
             builder
                     .addMethod(MethodSpec
                             .methodBuilder(

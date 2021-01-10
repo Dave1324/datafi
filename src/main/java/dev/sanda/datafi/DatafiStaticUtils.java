@@ -6,8 +6,8 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import dev.sanda.datafi.persistence.Archivable;
-import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
-import dev.sanda.datafi.reflection.ReflectionCache;
+import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
+import dev.sanda.datafi.reflection.runtime_services.ReflectionCache;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
@@ -35,13 +35,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class DatafiStaticUtils {
-    public static String toPascalCase(String string){
+    public static String toPascalCase(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
-    public static String toCamelCase(String string){
+
+    public static String toCamelCase(String string) {
         return string.substring(0, 1).toLowerCase() + string.substring(1);
     }
-    public static String toPlural(String word){
+
+    public static String toPlural(String word) {
         return English.plural(word);
     }
 
@@ -71,14 +73,32 @@ public class DatafiStaticUtils {
             e.printStackTrace();
         }
     }
-    public static void throwEntityNotFoundException(String simpleName, Object id){
+
+    public static List<VariableElement> getFieldsOf(TypeElement entity) {
+        return entity
+                .getEnclosedElements()
+                .stream()
+                .filter(e -> e.getKind().isField())
+                .map(e -> (VariableElement)e)
+                .collect(Collectors.toList());
+    }
+
+    public static boolean isCollectionField(Element element, ProcessingEnvironment env){
+        boolean isField = element.getKind().isField();
+        if(!isField) return false;
+        val typeUtils = env.getTypeUtils();
+        TypeMirror collection = typeUtils.erasure(env.getElementUtils().getTypeElement("java.util.Set").asType());
+        return typeUtils.isAssignable(typeUtils.erasure(element.asType()), collection);
+    }
+
+    public static void throwEntityNotFoundException(String simpleName, Object id) {
         throw new RuntimeException("Cannot find " + simpleName + " by id: " + id);
     }
 
     @SuppressWarnings("unchecked")
-    public static<T> List<Object> getIdList(Collection<T> input, ReflectionCache reflectionCache) {
-        if(input.isEmpty()) return new ArrayList<>();
-        Collection<T> deproxifiedInput = (Collection<T>)input.stream().map(DatafiStaticUtils::deProxify).collect(Collectors.toSet());
+    public static <T> List<Object> getIdList(Collection<T> input, ReflectionCache reflectionCache) {
+        if (input.isEmpty()) return new ArrayList<>();
+        Collection<T> deproxifiedInput = (Collection<T>) input.stream().map(DatafiStaticUtils::deProxify).collect(Collectors.toSet());
         T firstItem = deproxifiedInput.iterator().next();
         final String clazzName = firstItem.getClass().getSimpleName();
         final CachedEntityTypeInfo cachedEntityTypeInfo = reflectionCache.getEntitiesCache().get(clazzName);
@@ -87,15 +107,14 @@ public class DatafiStaticUtils {
         return ids;
     }
 
-    public static<T> PageRequest generatePageRequest(dev.sanda.datafi.dto.PageRequest request,  long totalCount) {
+    public static <T> PageRequest generatePageRequest(dev.sanda.datafi.dto.PageRequest request, long totalCount) {
         int pageNumber, pageSize;
-        if(request.getFetchAll()){
+        if (request.getFetchAll()) {
             pageNumber = 0;
             pageSize = (int) totalCount;
-        }
-        else if (!request.isValidPagingRange()) {
+        } else if (!request.isValidPagingRange()) {
             throw new IllegalArgumentException("Invalid paging range");
-        }else {
+        } else {
             pageNumber = request.getPageNumber();
             pageSize = request.getPageSize();
         }
@@ -108,29 +127,29 @@ public class DatafiStaticUtils {
             return PageRequest.of(pageNumber, pageSize);
     }
 
-    public static void validateSortByIfNonNull(Class<?> clazz, String sortByFieldName, ReflectionCache reflectionCache){
-        if(sortByFieldName == null) return;
+    public static void validateSortByIfNonNull(Class<?> clazz, String sortByFieldName, ReflectionCache reflectionCache) {
+        if (sortByFieldName == null) return;
         CachedEntityTypeInfo entityTypeInfo = reflectionCache.getEntitiesCache().get(clazz.getSimpleName());
-        if(!entityTypeInfo.getSortKeys().contains(sortByFieldName))
+        if (!entityTypeInfo.getSortKeys().contains(sortByFieldName))
             throw new IllegalArgumentException(
-                    "Cannot sort by "+ sortByFieldName +" as there is no such field in " + clazz.getName());
+                    "Cannot sort by " + sortByFieldName + " as there is no such field in " + clazz.getName());
     }
 
-    public static String firstLowerCaseLetterOf(String str){
+    public static String firstLowerCaseLetterOf(String str) {
         return str.substring(0, 1).toLowerCase();
     }
 
     public static ClassName getIdType(TypeElement entity, ProcessingEnvironment processingEnv) {
-        for(Element field : entity.getEnclosedElements()){
-            if(field.getKind() == ElementKind.FIELD &&
+        for (Element field : entity.getEnclosedElements()) {
+            if (field.getKind() == ElementKind.FIELD &&
                     (
                             field.getAnnotation(Id.class) != null || field.getAnnotation(EmbeddedId.class) != null
-                    )){
+                    )) {
                 return (ClassName) ClassName.get(field.asType());
             }
         }
         VariableElement idField;
-        if((idField = getPrimaryKeyJoinColumn(entity, processingEnv)) != null)
+        if ((idField = getPrimaryKeyJoinColumn(entity, processingEnv)) != null)
             return (ClassName) ClassName.get(idField.asType());
         processingEnv
                 .getMessager()
@@ -142,14 +161,14 @@ public class DatafiStaticUtils {
     private static VariableElement getPrimaryKeyJoinColumn(
             TypeElement entity,
             ProcessingEnvironment processingEnv) {
-        val superClass = (TypeElement)((DeclaredType)entity.getSuperclass()).asElement();
-        if(superClass.getAnnotation(Entity.class) != null || superClass.getAnnotation(Table.class) != null){
+        val superClass = (TypeElement) ((DeclaredType) entity.getSuperclass()).asElement();
+        if (superClass.getAnnotation(Entity.class) != null || superClass.getAnnotation(Table.class) != null) {
             String primaryKeyJoinColumnName;
             val primaryKeyJoinColumnAnnotation = entity.getAnnotation(PrimaryKeyJoinColumn.class);
-            if(primaryKeyJoinColumnAnnotation != null)
+            if (primaryKeyJoinColumnAnnotation != null)
                 primaryKeyJoinColumnName = primaryKeyJoinColumnAnnotation.referencedColumnName();
             else
-                primaryKeyJoinColumnName  = superClass.getEnclosedElements().stream()
+                primaryKeyJoinColumnName = superClass.getEnclosedElements().stream()
                         .filter(e -> e.getAnnotation(Id.class) != null || e.getAnnotation(EmbeddedId.class) != null)
                         .map(idField -> idField.getSimpleName().toString())
                         .findFirst()
@@ -157,7 +176,7 @@ public class DatafiStaticUtils {
             return superClass.getEnclosedElements().stream()
                     .filter(elem -> elem.getKind().isField() &&
                             elem.getSimpleName().toString().equals(primaryKeyJoinColumnName))
-                    .map(idField -> (VariableElement)idField)
+                    .map(idField -> (VariableElement) idField)
                     .findFirst()
                     .orElse(null);
         }
@@ -189,7 +208,7 @@ public class DatafiStaticUtils {
         return toCamelCase(element.getSimpleName().toString());
     }
 
-    public static String simpleNameOf(Element element){
+    public static String simpleNameOf(Element element) {
         return element.getSimpleName().toString();
     }
 
@@ -199,7 +218,7 @@ public class DatafiStaticUtils {
             Map<String, TypeName> entityFieldsMap = new HashMap<>();
             final Set<? extends Element> fields =
                     entity.getEnclosedElements().stream().filter(e -> e.getKind().isField()).collect(Collectors.toSet());
-            for(Element field : fields){
+            for (Element field : fields) {
                 entityFieldsMap.put(field.getSimpleName().toString(), TypeName.get(field.asType()));
             }
             result.put(entity, entityFieldsMap);
@@ -207,9 +226,9 @@ public class DatafiStaticUtils {
         return result;
     }
 
-    public static boolean isDirectlyOrIndirectlyAnnotatedAs(Element element, Class<? extends Annotation> annotationType){
+    public static boolean isDirectlyOrIndirectlyAnnotatedAs(Element element, Class<? extends Annotation> annotationType) {
         boolean isDirectlyAnnotated = element.getAnnotation(annotationType) != null;
-        if(isDirectlyAnnotated) return true;
+        if (isDirectlyAnnotated) return true;
         return element.getAnnotationMirrors().stream()
                 .anyMatch(am -> am.getAnnotationType().asElement().getAnnotation(annotationType) != null);
     }
@@ -218,10 +237,10 @@ public class DatafiStaticUtils {
     //if we want the actual name of the actual bean, we need to
     //'deproxy' the instance.
     public static String extractActualName(Object proxyInstance, String classNameKeyWord) {
-        val interfaces = ((Advised)proxyInstance).getProxiedInterfaces();
+        val interfaces = ((Advised) proxyInstance).getProxiedInterfaces();
         String actualName = "";
-        for(Class<?> interface_ : interfaces){
-            if(interface_.getSimpleName().contains(classNameKeyWord)){
+        for (Class<?> interface_ : interfaces) {
+            if (interface_.getSimpleName().contains(classNameKeyWord)) {
                 actualName = interface_.getSimpleName();
                 break;
             }
@@ -230,7 +249,7 @@ public class DatafiStaticUtils {
         return endIndex != -1 ? actualName.substring(0, endIndex) : null;
     }
 
-    public static<V> Map<String ,V> toServicesMap(List<? extends V> asList, String classNameKeyWord){
+    public static <V> Map<String, V> toServicesMap(List<? extends V> asList, String classNameKeyWord) {
         return asList
                 .stream()
                 .collect(Collectors.toMap(
@@ -245,9 +264,9 @@ public class DatafiStaticUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T deProxify(Object possibleProxy){
+    public static <T> T deProxify(Object possibleProxy) {
         Object result = possibleProxy;
-        if(possibleProxy instanceof HibernateProxy) {
+        if (possibleProxy instanceof HibernateProxy) {
             HibernateProxy hibernateProxy = (HibernateProxy) possibleProxy;
             LazyInitializer initializer =
                     hibernateProxy.getHibernateLazyInitializer();
@@ -256,7 +275,7 @@ public class DatafiStaticUtils {
         return (T) result;
     }
 
-    public static boolean isArchivable(TypeElement entity, ProcessingEnvironment processingEnv){
+    public static boolean isArchivable(TypeElement entity, ProcessingEnvironment processingEnv) {
         return implementsInterface(
                 entity,
                 processingEnv
@@ -270,10 +289,11 @@ public class DatafiStaticUtils {
         return processingEnv.getTypeUtils().isAssignable(myTypeElement.asType(), desiredInterface);
     }
 
-    public static boolean hasOneOfAnnotations(Element element, Class<? extends Annotation>... annotationTypes){
+    public static boolean hasOneOfAnnotations(Element element, Class<? extends Annotation>... annotationTypes) {
         return Arrays.stream(annotationTypes).anyMatch(type -> element.getAnnotation(type) != null);
     }
-    public static boolean hasOneOfAnnotations(Field field, Class<? extends Annotation>... annotationTypes){
+
+    public static boolean hasOneOfAnnotations(Field field, Class<? extends Annotation>... annotationTypes) {
         return Arrays.stream(annotationTypes).anyMatch(field::isAnnotationPresent);
     }
 }

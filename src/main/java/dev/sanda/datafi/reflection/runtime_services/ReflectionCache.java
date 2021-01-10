@@ -1,7 +1,9 @@
-package dev.sanda.datafi.reflection;
+package dev.sanda.datafi.reflection.runtime_services;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import dev.sanda.datafi.reflection.relationship_synchronization.EntityRelationshipSyncronizer;
+import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
 import lombok.Getter;
 import lombok.NonNull;
 import org.reflections.Reflections;
@@ -26,7 +28,11 @@ public class ReflectionCache {
     private Map<Map.Entry<String, Class<?>[]>, Method> resolversCache;
 
     @Autowired
+    private CollectionsTypeResolver collectionsTypeResolver;
+
+    @Autowired
     private BasePackageResolver basePackageResolver;
+
     @PostConstruct
     private void init() {
         reflections = new Reflections(basePackageResolver.getBasePackage());
@@ -40,7 +46,8 @@ public class ReflectionCache {
                         new CachedEntityTypeInfo(
                                 currentType,
                                 getClassFields(currentType),
-                                getPublicMethodsOf(currentType)));
+                                getPublicMethodsOf(currentType),
+                                new EntityRelationshipSyncronizer(currentType, collectionsTypeResolver)));
         }
     }
 
@@ -77,7 +84,7 @@ public class ReflectionCache {
         return currentClassFields;
     }
 
-    public Object getIdOf(String clazzName, Object instance){
+    public Object getIdOf(String clazzName, Object instance) {
         return entitiesCache.get(clazzName).getId(instance);
     }
 }

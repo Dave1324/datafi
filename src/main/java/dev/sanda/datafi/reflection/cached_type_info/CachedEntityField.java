@@ -1,4 +1,4 @@
-package dev.sanda.datafi.reflection;
+package dev.sanda.datafi.reflection.cached_type_info;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

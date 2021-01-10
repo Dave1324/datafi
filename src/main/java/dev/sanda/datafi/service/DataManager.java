@@ -6,8 +6,8 @@ import dev.sanda.datafi.dto.FreeTextSearchPageRequest;
 import dev.sanda.datafi.dto.Page;
 import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.persistence.GenericDao;
-import dev.sanda.datafi.reflection.CachedEntityTypeInfo;
-import dev.sanda.datafi.reflection.ReflectionCache;
+import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
+import dev.sanda.datafi.reflection.runtime_services.ReflectionCache;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
@@ -37,7 +37,8 @@ import static dev.sanda.datafi.DatafiStaticUtils.*;
 public class DataManager<T> {
     @Autowired
     private EntityManager entityManager;
-    @NonNull @Getter
+    @NonNull
+    @Getter
     private Class<T> clazz;
     @Getter
     private String clazzSimpleName;
@@ -61,7 +62,7 @@ public class DataManager<T> {
     /*@Autowired
     private EntityTypeRuntimeResolver<T> typeRuntimeResolver;*/
 
-    public void setType(Class<T> clazz){
+    public void setType(Class<T> clazz) {
         this.clazz = clazz;
         setClazzSimpleName(clazz);
         dao = daoMap.get(clazzSimpleName);
@@ -69,11 +70,11 @@ public class DataManager<T> {
     }
 
     @PostConstruct
-    private void init(){
+    private void init() {
         setClazzSimpleName(clazz);
         log.trace("Running @PostConstruct init method for DataManager<{}>", clazzSimpleName);
         daoMap = toServicesMap(daoCollector.getDaos(), "Dao");
-        if(clazz != null) setType(clazz);
+        if (clazz != null) setType(clazz);
     }
 
     private void setClazzSimpleName(Class<T> clazz) {
@@ -83,28 +84,28 @@ public class DataManager<T> {
                 this.clazz != null ? reflectionCache.getEntitiesCache().get(clazzSimpleName).getIdField().getType().getSimpleName() : "Object";
     }
 
-    private void logTrace(String method, String msg, Object ...args) {
-        if(!loggingEnabled) return;
+    private void logTrace(String method, String msg, Object... args) {
+        if (!loggingEnabled) return;
         log.trace("DataManager<{}>." + method + " " + msg, clazzSimpleName, args);
     }
 
-    private void logInfo(String method, String msg, Object ...args) {
-        if(!loggingEnabled) return;
+    private void logInfo(String method, String msg, Object... args) {
+        if (!loggingEnabled) return;
         log.info("DataManager<{}>." + method + " " + msg, clazzSimpleName, args);
     }
 
-    private void logError(String method, String msg, Object ...args) {
-        if(!loggingEnabled) return;
+    private void logError(String method, String msg, Object... args) {
+        if (!loggingEnabled) return;
         log.error("DataManager<{}>." + method + " " + msg, clazzSimpleName, args);
     }
 
-    public List<T> findAll(){
+    public List<T> findAll() {
         final List all = dao.findAll();
         logInfo("findAll()", "fetched {} {}", all.size(), clazzSimpleNamePlural);
         return all;
     }
 
-    public EntityManager entityManager(){
+    public EntityManager entityManager() {
         return entityManager;
     }
 
@@ -264,8 +265,8 @@ public class DataManager<T> {
     }
 
 
-    public List<T> findBy(String attributeName, Object attributeValue){
-        try{
+    public List<T> findBy(String attributeName, Object attributeValue) {
+        try {
             final Class<?> attributeValueClass = attributeValue.getClass();
             Class<?>[] params = new Class<?>[]{attributeValueClass};
             String resolverName = "findBy" + toPascalCase(attributeName);
@@ -280,8 +281,8 @@ public class DataManager<T> {
         }
     }
 
-    public Optional<T> findByUnique(String attributeName, Object attributeValue){
-        try{
+    public Optional<T> findByUnique(String attributeName, Object attributeValue) {
+        try {
             final Class<?> attributeValueClass = attributeValue.getClass();
             Class<?>[] params = new Class<?>[]{attributeValueClass};
             String resolverName = "findBy" + toPascalCase(attributeName);
@@ -293,13 +294,13 @@ public class DataManager<T> {
                             "could not find {} by field {} with matching value of {}",
                     attributeValueClass.getSimpleName(), clazzSimpleName, attributeName, attributeValue.toString());
             return result;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<T> findAllBy(String attributeName, Object[] attributeValues){
-        try{
+    public List<T> findAllBy(String attributeName, Object[] attributeValues) {
+        try {
             Class<?>[] params = new Class<?>[]{List.class};
             String resolverName = "findAllBy" + toPascalCase(attributeName) + "In";
             Method methodToInvoke = getMethodToInvoke(resolverName, params, dao);
@@ -309,7 +310,7 @@ public class DataManager<T> {
                     "found {} {} by provided attribute values: {}",
                     result.size(), clazzSimpleNamePlural, Arrays.toString(attributeValues));
             return result;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -353,30 +354,30 @@ public class DataManager<T> {
         return count;
     }
 
-    public <TResult> TResult callQuery(String queryName, Object... args){
-        try{
+    public <TResult> TResult callQuery(String queryName, Object... args) {
+        try {
             Class<?>[] params = new Class<?>[args.length];
             for (int i = 0; i < args.length; i++) params[i] = args[i].getClass();
             Method methodToInvoke = getMethodToInvoke(queryName, params, dao);
             final TResult result = (TResult) methodToInvoke.invoke(dao, args);
             logInfo("callQuery(String queryName, Object... args)",
                     Collection.class.isAssignableFrom(result.getClass()) ?
-                    String.format("fetched %d records from database with query '%s'", ((Collection) result).size(), queryName) :
-                    String.format("fetched %s from database with query '%s'", result.getClass().getSimpleName(), queryName));
+                            String.format("fetched %d records from database with query '%s'", ((Collection) result).size(), queryName) :
+                            String.format("fetched %s from database with query '%s'", result.getClass().getSimpleName(), queryName));
             return result;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public T cascadeUpdate(T toUpdate, T source){
+    public T cascadeUpdate(T toUpdate, T source) {
         final T updated = (T) cascadeUpdateImpl(toUpdate, source);
         logInfo("cascadeUpdate({} toUpdate, {} source)", "cascade updated {}",
                 clazzSimpleName, clazzSimpleName, clazzSimpleName);
         return updated;
     }
 
-    public<HasTs> List<T> createAndAddNewToCollectionIn(HasTs toAddTo, String fieldName, List<T> toAdd){
+    public <HasTs> List<T> createAndAddNewToCollectionIn(HasTs toAddTo, String fieldName, List<T> toAdd) {
 
         final String toAddToClazzName = toAddTo.getClass().getSimpleName();
         GenericDao toAddDao = dao;
@@ -384,13 +385,13 @@ public class DataManager<T> {
 
         toAddTo = (HasTs)
                 toAddToDao
-                .findById(reflectionCache.getEntitiesCache().get(toAddToClazzName).getId(toAddTo))
-                .orElse(null);
-        if(toAddTo == null) throw new IllegalArgumentException("Could not find an entity with the given id");
-        Method existingCollectionGetter = getMethodToInvoke("get" + toPascalCase(fieldName) ,toAddTo);
+                        .findById(reflectionCache.getEntitiesCache().get(toAddToClazzName).getId(toAddTo))
+                        .orElse(null);
+        if (toAddTo == null) throw new IllegalArgumentException("Could not find an entity with the given id");
+        Method existingCollectionGetter = getMethodToInvoke("get" + toPascalCase(fieldName), toAddTo);
         Collection<T> existingCollection = (Collection<T>) invoke(existingCollectionGetter, toAddTo);
         existingCollection.addAll(toAdd);
-        Method existingCollectionSetter = getMethodToInvoke("set" + toPascalCase(fieldName) ,toAddTo);
+        Method existingCollectionSetter = getMethodToInvoke("set" + toPascalCase(fieldName), toAddTo);
         invoke(existingCollectionSetter, toAddTo, existingCollection);
 
         toAddToDao.save(toAddTo);
@@ -402,7 +403,7 @@ public class DataManager<T> {
         return toAdd;
     }
 
-    public<HasTs> List<T> associateExistingWithCollectionIn(HasTs toAssociateWith, String fieldName, List<T> toAssociate){
+    public <HasTs> List<T> associateExistingWithCollectionIn(HasTs toAssociateWith, String fieldName, List<T> toAssociate) {
 
         GenericDao toAssociateDao = dao;
         final String toAssociateWithClazzName = toAssociateWith.getClass().getSimpleName();
@@ -411,11 +412,11 @@ public class DataManager<T> {
         toAssociate = toAssociateDao.findAllById(getIdList(toAssociate, reflectionCache));
         toAssociateWith = (HasTs) toAssociateWithDao.findById(reflectionCache.getEntitiesCache()
                 .get(toAssociateWithClazzName).getId(toAssociateWith)).orElse(null);
-        if(toAssociateWith == null) throw new IllegalArgumentException("Could not find an entity with the given id");
-        Method existingCollectionGetter = getMethodToInvoke("get" + toPascalCase(fieldName) ,toAssociateWith);
+        if (toAssociateWith == null) throw new IllegalArgumentException("Could not find an entity with the given id");
+        Method existingCollectionGetter = getMethodToInvoke("get" + toPascalCase(fieldName), toAssociateWith);
         Collection<T> existingCollection = (Collection<T>) invoke(existingCollectionGetter, toAssociateWith);
         existingCollection.addAll(toAssociate);
-        Method existingCollectionSetter = getMethodToInvoke("set" + toPascalCase(fieldName) ,toAssociateWith);
+        Method existingCollectionSetter = getMethodToInvoke("set" + toPascalCase(fieldName), toAssociateWith);
         invoke(existingCollectionSetter, toAssociateWith, existingCollection);
         toAssociateWithDao.save(toAssociateWith);
 
@@ -426,15 +427,15 @@ public class DataManager<T> {
         return toAssociate;
     }
 
-    public List<T> cascadeUpdateCollection(Collection<T> toUpdate, Collection<T> updated){
+    public List<T> cascadeUpdateCollection(Collection<T> toUpdate, Collection<T> updated) {
         Map<Object, T> updatedEntitiesMap = updated
                 .stream()
                 .collect(Collectors.toMap(
                         updatedObj -> getId(updatedObj, reflectionCache),
                         updatedObj -> updatedObj
                 ));
-        for(T entityToUpdate : toUpdate){
-            T updatedEntity =  updatedEntitiesMap.get(getId(entityToUpdate, reflectionCache));
+        for (T entityToUpdate : toUpdate) {
+            T updatedEntity = updatedEntitiesMap.get(getId(entityToUpdate, reflectionCache));
             cascadeUpdateImpl(entityToUpdate, updatedEntity);
         }
         logInfo("cascadeUpdateCollection(Iterable<{}> toUpdate, Iterable<{}> updated)",
@@ -443,25 +444,32 @@ public class DataManager<T> {
         return dao.saveAll(toUpdate);
     }
 
-    private Object cascadeUpdateImpl(Object toUpdate, Object source){ ;
+    private Object cascadeUpdateImpl(Object toUpdate, Object source) {
+        ;
         Class<?> currentClazz = toUpdate.getClass();
         String currentClazzName = currentClazz.getSimpleName();
         logInfo("cascadeUpdateImpl({} toUpdate, {} source)",
                 "cascade updating {}",
                 currentClazzName, currentClazzName, currentClazzName);
         Collection<Field> fieldsToUpdate = reflectionCache.getEntitiesCache().get(currentClazz.getSimpleName()).getCascadeUpdatableFields();
-        for(Field currentField : fieldsToUpdate){
+        for (Field currentField : fieldsToUpdate) {
             try {
                 currentField.setAccessible(true);
                 Object sourceFieldValue = currentField.get(source);
                 //if field value is null, there's nothing to update to
-                if(sourceFieldValue == null) continue;
+                if (sourceFieldValue == null) continue;
                 //if field is an embedded entity, we need to recursively update all of its fields
-                if(isForeignKey(currentField, toUpdate)) {
-                    cascadeUpdateImpl(currentField.get(toUpdate), sourceFieldValue);
+                if (isForeignKey(currentField, toUpdate)) {
+                    Object targetFieldToUpdateValue = currentField.get(toUpdate);
+                    cascadeUpdateImpl(targetFieldToUpdateValue, sourceFieldValue);
+                    reflectionCache
+                            .getEntitiesCache()
+                            .get(currentField.getType().getSimpleName())
+                            .getRelationshipSyncronizer()
+                            .trySetBackpointer(currentField, targetFieldToUpdateValue, toUpdate);
                 }
                 //if field is a foreign key collection, that's outside of this use case
-                else if(!isForeignKeyCollection(currentField))
+                else if (!isForeignKeyCollection(currentField))
                     //else, (...finally) update field value
                     currentField.set(toUpdate, sourceFieldValue);
             } catch (Exception e) {
@@ -478,17 +486,17 @@ public class DataManager<T> {
     }
 
     private boolean isForeignKey(Field currentField, Object owner) {
-        try{
+        try {
             currentField.setAccessible(true);
             boolean isForeignKey = currentField.isAnnotationPresent(OneToOne.class) ||
                     currentField.isAnnotationPresent(ManyToOne.class);
-            if(isForeignKey) {
-                if(currentField.get(owner) == null)
+            if (isForeignKey) {
+                if (currentField.get(owner) == null)
                     currentField.set(owner, defaultInstanceOf(currentField.getType()));
                 return true;
             }
             return false;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -501,11 +509,11 @@ public class DataManager<T> {
         return getMethodToInvoke(resolverName, new Class<?>[]{}, instance);
     }
 
-    private Method getMethodToInvoke(String resolverName, Class<?>[] params, Object instance){
+    private Method getMethodToInvoke(String resolverName, Class<?>[] params, Object instance) {
         Method methodToInvoke = reflectionCache.getResolversCache().get(immutableEntry(resolverName, params));
-        if(methodToInvoke == null){
+        if (methodToInvoke == null) {
             try {
-                if(params.length > 0)
+                if (params.length > 0)
                     methodToInvoke = instance.getClass().getMethod(resolverName, params);
                 else
                     methodToInvoke = instance.getClass().getMethod(resolverName);
@@ -517,22 +525,22 @@ public class DataManager<T> {
         return methodToInvoke;
     }
 
-    private Object invoke(Method method, Object instance, Object... args){
-        try{
-            if(args.length > 0) return method.invoke(instance, args);
+    private Object invoke(Method method, Object instance, Object... args) {
+        try {
+            if (args.length > 0) return method.invoke(instance, args);
             else return method.invoke(instance);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Page<T> freeTextSearchBy(FreeTextSearchPageRequest request){
+    public Page<T> freeTextSearchBy(FreeTextSearchPageRequest request) {
         return freeTextSearchBy(request, -1);
     }
 
-    public Page<T> freeTextSearchBy(FreeTextSearchPageRequest request, long totalCount){
-        try{
-            if(request.getSearchTerm() == null || request.getSearchTerm().equals(""))
+    public Page<T> freeTextSearchBy(FreeTextSearchPageRequest request, long totalCount) {
+        try {
+            if (request.getSearchTerm() == null || request.getSearchTerm().equals(""))
                 throw new IllegalArgumentException(
                         "Illegal attempt to search for " + clazzSimpleNamePlural + " with null or blank string"
                 );
@@ -545,7 +553,7 @@ public class DataManager<T> {
             logInfo("freeTextSearchBy(String searchTerm)", "found {} {} by searchTerm '{}'",
                     result.getTotalElements(), clazzSimpleNamePlural, request.getSearchTerm());
             return new Page<>(result);
-        }catch (Exception e){
+        } catch (Exception e) {
             logError("freeTextSearchBy(String searchTerm, int offset, int limit, String sortBy, Sort.Direction sortDirection)", e.toString());
             throw new RuntimeException(e);
         }
@@ -555,34 +563,37 @@ public class DataManager<T> {
         Object id = cachedEntityTypeInfo.getId(input);
         final String simpleName = input.getClass().getSimpleName();
         T toArchive = findById(id).orElse(null);
-        if(toArchive == null) DatafiStaticUtils.throwEntityNotFoundException(simpleName, id);
-        ((A)toArchive).setIsArchived(true);
+        if (toArchive == null) DatafiStaticUtils.throwEntityNotFoundException(simpleName, id);
+        ((A) toArchive).setIsArchived(true);
         final A saved = (A) save(toArchive);
         logInfo("archive({} input)", "archived {} with id {}", clazzSimpleName, clazzSimpleName, id.toString());
         return saved;
     }
+
     public <A extends Archivable> A deArchive(A input) {
         Object id = cachedEntityTypeInfo.getId(input);
         final String simpleName = input.getClass().getSimpleName();
         T toDeArchive = findById(id).orElse(null);
-        if(toDeArchive == null) DatafiStaticUtils.throwEntityNotFoundException(simpleName, id);
-        ((A)toDeArchive).setIsArchived(false);
+        if (toDeArchive == null) DatafiStaticUtils.throwEntityNotFoundException(simpleName, id);
+        ((A) toDeArchive).setIsArchived(false);
         final A saved = (A) save(toDeArchive);
         logInfo("deArchive({} input)", "de-archived {} with id {}", clazzSimpleName, clazzSimpleName, id.toString());
         return saved;
     }
+
     public <A extends Archivable> List<A> archiveCollection(Collection<A> input) {
         List<Object> ids = DatafiStaticUtils.getIdList(input, reflectionCache);
         List<T> toArchive = findAllById(ids);
-        toArchive.forEach(item -> ((A)item).setIsArchived(true));
+        toArchive.forEach(item -> ((A) item).setIsArchived(true));
         final List<A> saved = (List<A>) saveAll(toArchive);
         logInfo("archiveCollection(Collection<{}> input)", "archived {} {}", clazzSimpleName, saved.size(), clazzSimpleNamePlural);
         return saved;
     }
+
     public <A extends Archivable> List<A> deArchiveCollection(Collection<A> input) {
         List<Object> ids = DatafiStaticUtils.getIdList(input, reflectionCache);
         List<T> toDeArchive = findAllById(ids);
-        toDeArchive.forEach(item -> ((A)item).setIsArchived(false));
+        toDeArchive.forEach(item -> ((A) item).setIsArchived(false));
         final List<A> saved = (List<A>) saveAll(toDeArchive);
         logInfo("deArchiveCollection(Collection<{}> input)", "de-archived {} {}", clazzSimpleName, saved.size(), clazzSimpleNamePlural);
         return saved;

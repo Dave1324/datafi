@@ -11,6 +11,7 @@ import java.io.Serializable;
  * code required to deal with the logic of persisting an entity
  * to a database - i.e. generating the id, marking a given
  * instance as non-archived, adding a 'createdAt' column.
+ *
  * @param <TID>
  */
 @MappedSuperclass
@@ -27,21 +28,25 @@ public abstract class BasePersistableEntity<TID> implements Serializable {
     @EmbeddedId
     @NonNull
     @NonApiUpdatable
-    @Column(name = "id", unique=true, nullable=false, updatable=false)
+    @Column(name = "id", unique = true, nullable = false, updatable = false)
     protected TID id;
     @NonApiUpdatable
     private Boolean isFirstPersist = true;
     @Version
     @NonApiUpdatable
     private Long version = 0L;
+
     @PrePersist
-    public void init(){
-        if(isFirstPersist){
+    public void init() {
+        if (isFirstPersist) {
             initId();
             customFirstTimeInit();
             isFirstPersist = false;
         }
     }
-    protected void customFirstTimeInit(){}
+
+    protected void customFirstTimeInit() {
+    }
+
     public abstract void initId();
 }

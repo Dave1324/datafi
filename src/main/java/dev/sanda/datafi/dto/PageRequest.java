@@ -18,12 +18,12 @@ public class PageRequest {
 
     private Map<String, Object> customArgs = new HashMap<>();
 
-    public boolean isValidPagingRange(){
+    public boolean isValidPagingRange() {
         return pageNumber >= 0 && pageSize > 0;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getCustomArg(String key){
-        return customArgs.containsKey(key) ? (T)customArgs.get(key) : null;
+    public <T> T getCustomArg(String key) {
+        return customArgs.containsKey(key) ? (T) customArgs.get(key) : null;
     }
 }

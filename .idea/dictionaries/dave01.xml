@@ -2,9 +2,13 @@
   <dictionary name="dave01">
     <words>
       <w>archivable</w>
+      <w>backpointer</w>
+      <w>backpointers</w>
+      <w>instantiator</w>
       <w>jpql</w>
       <w>persistable</w>
       <w>sindaryn</w>
+      <w>syncronizer</w>
       <w>updatable</w>
     </words>
   </dictionary>

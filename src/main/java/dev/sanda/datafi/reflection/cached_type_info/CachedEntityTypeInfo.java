@@ -1,9 +1,11 @@
-package dev.sanda.datafi.reflection;
+package dev.sanda.datafi.reflection.cached_type_info;
 
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatable;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatables;
 import dev.sanda.datafi.annotations.attributes.NonNullable;
 import dev.sanda.datafi.persistence.Archivable;
+import dev.sanda.datafi.reflection.relationship_synchronization.EntityRelationshipSyncronizer;
+import lombok.Getter;
 import lombok.val;
 
 import javax.persistence.*;
@@ -13,16 +15,19 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static dev.sanda.datafi.DatafiStaticUtils.hasOneOfAnnotations;
-import static dev.sanda.datafi.reflection.ReflectionCache.getClassFields;
+import static dev.sanda.datafi.reflection.runtime_services.ReflectionCache.getClassFields;
 
 @lombok.Getter
 public class CachedEntityTypeInfo {
 
     private Field idField;
 
+    private Map<String, Field> backpointers;
     private Map<String, CachedElementCollectionField> elementCollections;
     private Map<String, CachedMapElementCollectionField> mapElementCollections;
 
+    @Getter
+    private EntityRelationshipSyncronizer relationshipSyncronizer;
     private Class<?> clazz;
     private Object defaultInstance;
     private Map<String, CachedEntityField> fields;
@@ -32,12 +37,15 @@ public class CachedEntityTypeInfo {
     private List<String> searchFields;
     private boolean isArchivable = false;
 
-    public CachedEntityTypeInfo(Class<?> clazz, Collection<Field> fields, Collection<Method> publicMethods) {
+    public CachedEntityTypeInfo(Class<?> clazz, Collection<Field> fields, Collection<Method> publicMethods, EntityRelationshipSyncronizer relationshipSyncronizer) {
+        this.relationshipSyncronizer = relationshipSyncronizer;
         sortKeys = new HashSet<>();
         elementCollections = new HashMap<>();
+        backpointers = new HashMap<>();
+        val blacklistedBackpointers = new HashSet<Class>();
         mapElementCollections = new HashMap<>();
         this.clazz = clazz;
-        if(Archivable.class.isAssignableFrom(clazz)) isArchivable = true;
+        if (Archivable.class.isAssignableFrom(clazz)) isArchivable = true;
         this.fields = new HashMap<>();
         fields.forEach(field -> {
             field.setAccessible(true);
@@ -45,22 +53,32 @@ public class CachedEntityTypeInfo {
             boolean isNonApiUpdatable = isNonApiUpdatable(field);
             boolean isNonNullable = isNonNullableField(field);
             val fieldName = field.getName();
-            if(isEmbeddedOrForeignKey(field))
+            if (isEmbeddedOrForeignKey(field))
                 addNestedSortKeys(field, fieldName + ".", new Stack<>());
             this.fields.put(
                     fieldName,
                     new CachedEntityField(field, isCollectionOrMap, isNonApiUpdatable, isNonNullable)
             );
             sortKeys.add(fieldName);
-            if(field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
+            if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
                 this.idField = field;
             }
-            if(field.isAnnotationPresent(ElementCollection.class)){
+            if (field.isAnnotationPresent(ElementCollection.class)) {
                 val fieldType = field.getType();
-                if(Map.class.isAssignableFrom(fieldType)){
+                if (Map.class.isAssignableFrom(fieldType)) {
                     mapElementCollections.put(fieldName, new CachedMapElementCollectionField(field));
-                }else if(Collection.class.isAssignableFrom(fieldType)) {
+                } else if (Collection.class.isAssignableFrom(fieldType)) {
                     elementCollections.put(fieldName, new CachedElementCollectionField(field));
+                }
+            }
+            if(field.isAnnotationPresent(ManyToOne.class) && !blacklistedBackpointers.contains(field.getType())){
+                val fieldClazz = field.getType();
+                val fieldClazzName = fieldClazz.getSimpleName();
+                if(backpointers.containsKey(fieldClazzName)){
+                    backpointers.remove(fieldClazzName);
+                    blacklistedBackpointers.add(fieldClazz);
+                }else {
+                    backpointers.put(fieldClazzName, field);
                 }
             }
         });
@@ -79,12 +97,12 @@ public class CachedEntityTypeInfo {
                 Map.class.isAssignableFrom(field.getType());
     }
 
-    private void addNestedSortKeys(Field currentRoot, String currentPrefix, Stack<Class<?>> typesSoFar){
+    private void addNestedSortKeys(Field currentRoot, String currentPrefix, Stack<Class<?>> typesSoFar) {
         val currentRootType = currentRoot.getType();
-        if(typesSoFar.contains(currentRootType)) return;
+        if (typesSoFar.contains(currentRootType)) return;
         typesSoFar.push(currentRootType);
         getClassFields(currentRootType).forEach(field -> {
-            if(isEmbeddedOrForeignKey(field))
+            if (isEmbeddedOrForeignKey(field))
                 addNestedSortKeys(field, currentPrefix + field.getName() + ".", typesSoFar);
             val fieldName = currentPrefix + field.getName();
             sortKeys.add(fieldName);
@@ -93,7 +111,7 @@ public class CachedEntityTypeInfo {
     }
 
     private boolean isNonApiUpdatable(Field field) {
-        return  field.isAnnotationPresent(NonApiUpdatable.class) ||
+        return field.isAnnotationPresent(NonApiUpdatable.class) ||
                 isInNonCascadeUpdatables(field) ||
                 field.isAnnotationPresent(Id.class) ||
                 field.isAnnotationPresent(EmbeddedId.class) ||
@@ -105,9 +123,9 @@ public class CachedEntityTypeInfo {
 
     private boolean isInNonCascadeUpdatables(Field field) {
         NonApiUpdatables nonApiUpdatables = clazz.getAnnotation(NonApiUpdatables.class);
-        if(nonApiUpdatables != null){
-            for(String fieldName : nonApiUpdatables.value()){
-                if(fieldName.equals(field.getName()))
+        if (nonApiUpdatables != null) {
+            for (String fieldName : nonApiUpdatables.value()) {
+                if (fieldName.equals(field.getName()))
                     return true;
             }
         }
@@ -121,11 +139,11 @@ public class CachedEntityTypeInfo {
                 (field.isAnnotationPresent(ManyToOne.class) && !field.getAnnotation(ManyToOne.class).optional());
     }
 
-    public static Object genDefaultInstance(Class<?> clazz){
+    public static Object genDefaultInstance(Class<?> clazz) {
         Constructor[] cons = clazz.getDeclaredConstructors();
         try {
-            for(Constructor constructor : cons){
-                if(constructor.getParameterCount() == 0){
+            for (Constructor constructor : cons) {
+                if (constructor.getParameterCount() == 0) {
                     constructor.setAccessible(true);
                     return constructor.newInstance();
                 }
@@ -136,15 +154,15 @@ public class CachedEntityTypeInfo {
         }
     }
 
-    private void setCascadeUpdatableFields(){
+    private void setCascadeUpdatableFields() {
         this.cascadeUpdatableFields = new ArrayList<>();
         fields.values().forEach(_field -> {
-            if(!_field.isNonApiUpdatable())
+            if (!_field.isNonApiUpdatable())
                 cascadeUpdatableFields.add(_field.getField());
         });
     }
 
-    public Object getId(Object instance){
+    public Object getId(Object instance) {
         try {
             return this.idField.get(instance);
         } catch (IllegalAccessException e) {
@@ -152,7 +170,7 @@ public class CachedEntityTypeInfo {
         }
     }
 
-    public void addAllToElementCollection(String fieldName, Object instance, Collection<Object> toAdd){
+    public void addAllToElementCollection(String fieldName, Object instance, Collection<Object> toAdd) {
 
     }
 }

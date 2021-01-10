@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 public class Page<T> {
     private List<T> content;
@@ -18,7 +19,7 @@ public class Page<T> {
 
     private Map<String, Object> customValues = new HashMap<>();
 
-    public Page(org.springframework.data.domain.Page<T> page){
+    public Page(org.springframework.data.domain.Page<T> page) {
         content = page.getContent();
         totalPagesCount = (long) page.getTotalPages();
         totalItemsCount = page.getTotalElements();

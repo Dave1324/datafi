@@ -36,18 +36,18 @@ public class FreeTextSearchMethodsFactory {
         Map<TypeElement, MethodSpec> result = new HashMap<>();
         typeMirrorTypeElementMap = entities.stream().collect(Collectors.toMap(Element::asType, entity -> entity));
         entities
-        .stream()
-        .filter(entity -> entity.getAnnotation(WithFreeTextSearchByFields.class) != null)
-        .collect(Collectors.toSet())
-        .forEach(entityWithFreeTextSearchFields -> {
-            val searchFieldNames =
-                    Arrays.asList(entityWithFreeTextSearchFields.getAnnotation(WithFreeTextSearchByFields.class).value());
-            if(!searchFieldNames.isEmpty()){
-                MethodSpec freeTextSearchMethod =
-                        generateFreeTextSearchMethod(entityWithFreeTextSearchFields, searchFieldNames);
-                result.put(entityWithFreeTextSearchFields, freeTextSearchMethod);
-            }
-        });
+                .stream()
+                .filter(entity -> entity.getAnnotation(WithFreeTextSearchByFields.class) != null)
+                .collect(Collectors.toSet())
+                .forEach(entityWithFreeTextSearchFields -> {
+                    val searchFieldNames =
+                            Arrays.asList(entityWithFreeTextSearchFields.getAnnotation(WithFreeTextSearchByFields.class).value());
+                    if (!searchFieldNames.isEmpty()) {
+                        MethodSpec freeTextSearchMethod =
+                                generateFreeTextSearchMethod(entityWithFreeTextSearchFields, searchFieldNames);
+                        result.put(entityWithFreeTextSearchFields, freeTextSearchMethod);
+                    }
+                });
         return result;
     }
 
@@ -75,7 +75,7 @@ public class FreeTextSearchMethodsFactory {
         String placeHolder = DatafiStaticUtils.firstLowerCaseLetterOf(entityName);
         String selectionPrefix =
                 selectCount ? "SELECT COUNT(" + placeHolder + ") FROM " + entityName + " " + placeHolder
-                : "SELECT " + placeHolder + " FROM " + entityName + " " + placeHolder;
+                        : "SELECT " + placeHolder + " FROM " + entityName + " " + placeHolder;
         StringBuilder result = new StringBuilder(selectionPrefix);
         boolean isFirst = true;
         for (String fieldName : searchFieldNames) {
@@ -86,7 +86,7 @@ public class FreeTextSearchMethodsFactory {
             result.append(conditionPrefix);
             result.append(condition);
         }
-        if(isArchivable)
+        if (isArchivable)
             result.append(" AND ").append(placeHolder).append(".isArchived = false");
         return result.toString();
     }
