@@ -6,6 +6,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.annotations.free_text_search.WithFreeTextSearchByFields;
+import dev.sanda.datafi.code_generator.annotated_element_specs.EntityDalSpec;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.val;
@@ -32,34 +33,37 @@ public class FreeTextSearchMethodsFactory {
     private ProcessingEnvironment processingEnv;
     private Map<TypeMirror, TypeElement> typeMirrorTypeElementMap;
 
-    protected Map<TypeElement, MethodSpec> resolveFreeTextSearchMethods(Set<? extends TypeElement> entities) {
+    protected Map<TypeElement, MethodSpec> resolveFreeTextSearchMethods(List<EntityDalSpec> entityDalSpecs) {
         Map<TypeElement, MethodSpec> result = new HashMap<>();
-        typeMirrorTypeElementMap = entities.stream().collect(Collectors.toMap(Element::asType, entity -> entity));
-        entities
+        typeMirrorTypeElementMap = entityDalSpecs
                 .stream()
-                .filter(entity -> entity.getAnnotation(WithFreeTextSearchByFields.class) != null)
+                .map(EntityDalSpec::getElement)
+                .collect(Collectors.toMap(Element::asType, entity -> entity));
+        entityDalSpecs
+                .stream()
+                .filter(entityDalSpec -> entityDalSpec.getAnnotation(WithFreeTextSearchByFields.class) != null)
                 .collect(Collectors.toSet())
-                .forEach(entityWithFreeTextSearchFields -> {
+                .forEach(entityDavSpecWithFreeTextSearchFields -> {
                     val searchFieldNames =
-                            Arrays.asList(entityWithFreeTextSearchFields.getAnnotation(WithFreeTextSearchByFields.class).value());
+                            Arrays.asList(entityDavSpecWithFreeTextSearchFields.getAnnotation(WithFreeTextSearchByFields.class).value());
                     if (!searchFieldNames.isEmpty()) {
                         MethodSpec freeTextSearchMethod =
-                                generateFreeTextSearchMethod(entityWithFreeTextSearchFields, searchFieldNames);
-                        result.put(entityWithFreeTextSearchFields, freeTextSearchMethod);
+                                generateFreeTextSearchMethod(entityDavSpecWithFreeTextSearchFields, searchFieldNames);
+                        result.put(entityDavSpecWithFreeTextSearchFields.getElement(), freeTextSearchMethod);
                     }
                 });
         return result;
     }
 
-    private MethodSpec generateFreeTextSearchMethod(TypeElement entity, List<String> searchFieldNames) {
-        String entityName = entity.getSimpleName().toString();
+    private MethodSpec generateFreeTextSearchMethod(EntityDalSpec entityDalSpec, List<String> searchFieldNames) {
+        String entityName = entityDalSpec.getSimpleName();
         String methodName = "freeTextSearch";
         ParameterSpec argument = ParameterSpec.builder(String.class, "searchTerm")
                 .addAnnotation(AnnotationSpec.builder(Param.class)
                         .addMember("value", "$S", "searchTerm")
                         .build())
                 .build();
-        String freeTextSearchQuery = freeTextSearchQuery(entityName, searchFieldNames, isArchivable(entity, processingEnv), false);
+        String freeTextSearchQuery = freeTextSearchQuery(entityName, searchFieldNames, isArchivable(entityDalSpec.getElement(), processingEnv), false);
         return MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                 .addParameter(argument)
@@ -67,7 +71,7 @@ public class FreeTextSearchMethodsFactory {
                 .addAnnotation(AnnotationSpec.builder(Query.class)
                         .addMember("value", "$S", freeTextSearchQuery)
                         .build())
-                .returns(get(ClassName.get(Page.class), ClassName.get(entity)))
+                .returns(get(ClassName.get(Page.class), ClassName.get(entityDalSpec.getElement())))
                 .build();
     }
 

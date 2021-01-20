@@ -1,10 +1,11 @@
 package dev.sanda.datafi;
 
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import dev.sanda.datafi.annotations.EntityApiConfiguration;
+import dev.sanda.datafi.code_generator.annotated_element_specs.EntityDalSpec;
 import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.runtime_services.ReflectionCache;
@@ -19,10 +20,7 @@ import org.springframework.data.domain.Sort;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.persistence.*;
@@ -32,6 +30,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DatafiStaticUtils {
@@ -80,6 +79,16 @@ public class DatafiStaticUtils {
                 .stream()
                 .filter(e -> e.getKind().isField())
                 .map(e -> (VariableElement)e)
+                .collect(Collectors.toList());
+    }
+
+    public static List<ExecutableElement> getGettersOf(TypeElement entity) {
+        return entity
+                .getEnclosedElements()
+                .stream()
+                .filter(e -> e instanceof ExecutableElement)
+                .map(e -> (ExecutableElement)e)
+                .filter(e -> e.getSimpleName().toString().startsWith("get"))
                 .collect(Collectors.toList());
     }
 
@@ -149,7 +158,7 @@ public class DatafiStaticUtils {
             }
         }
         VariableElement idField;
-        if ((idField = getPrimaryKeyJoinColumn(entity, processingEnv)) != null)
+        if ((idField = getPrimaryKeyJoinColumn(entity)) != null)
             return (ClassName) ClassName.get(idField.asType());
         processingEnv
                 .getMessager()
@@ -159,8 +168,7 @@ public class DatafiStaticUtils {
     }
 
     private static VariableElement getPrimaryKeyJoinColumn(
-            TypeElement entity,
-            ProcessingEnvironment processingEnv) {
+            TypeElement entity) {
         val superClass = (TypeElement) ((DeclaredType) entity.getSuperclass()).asElement();
         if (superClass.getAnnotation(Entity.class) != null || superClass.getAnnotation(Table.class) != null) {
             String primaryKeyJoinColumnName;
@@ -196,12 +204,38 @@ public class DatafiStaticUtils {
                 .toArray(String[]::new);
     }
 
+
     @SuppressWarnings("unchecked")
-    public static Set<? extends TypeElement> getEntitiesSet(RoundEnvironment roundEnvironment) {
+    public static List<EntityDalSpec> getEntityApiSpecs(
+            RoundEnvironment roundEnvironment,
+            ProcessingEnvironment processingEnv) {
         Set<TypeElement> entities = new HashSet<>();
         entities.addAll((Collection<? extends TypeElement>) roundEnvironment.getElementsAnnotatedWith(Entity.class));
         entities.addAll((Collection<? extends TypeElement>) roundEnvironment.getElementsAnnotatedWith(Table.class));
-        return Sets.newHashSet(entities);
+        Map<TypeElement, TypeElement> extensionsMap =
+                ((Set<TypeElement>)
+                 roundEnvironment
+                 .getElementsAnnotatedWith(EntityApiConfiguration.class))
+                .stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        typeElement ->
+                                 (TypeElement) processingEnv
+                                .getTypeUtils()
+                                .asElement(typeElement.getSuperclass()))
+                )
+                .entrySet()
+                .stream()
+                .filter(entry ->
+                            entry.getValue().getAnnotation(Table.class) != null ||
+                            entry.getValue().getAnnotation(Entity.class) != null)
+                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        entities.forEach(entity -> extensionsMap.putIfAbsent(entity, null));
+        return extensionsMap
+                .entrySet()
+                .stream()
+                .map(entry -> new EntityDalSpec(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     public static String camelCaseNameOf(Element element) {
@@ -216,11 +250,9 @@ public class DatafiStaticUtils {
         Map<TypeElement, Map<String, TypeName>> result = new HashMap<>();
         for (TypeElement entity : entities) {
             Map<String, TypeName> entityFieldsMap = new HashMap<>();
-            final Set<? extends Element> fields =
-                    entity.getEnclosedElements().stream().filter(e -> e.getKind().isField()).collect(Collectors.toSet());
-            for (Element field : fields) {
+            val fields = entity.getEnclosedElements().stream().filter(e -> e.getKind().isField()).collect(Collectors.toSet());
+            for (Element field : fields)
                 entityFieldsMap.put(field.getSimpleName().toString(), TypeName.get(field.asType()));
-            }
             result.put(entity, entityFieldsMap);
         }
         return result;

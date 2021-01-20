@@ -1,11 +1,11 @@
 package dev.sanda.datafi.code_generator.query;
 
 import com.squareup.javapoet.*;
-import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.annotations.query.WithNativeQuery;
 import dev.sanda.datafi.annotations.query.WithNativeQueryScripts;
 import dev.sanda.datafi.annotations.query.WithQuery;
 import dev.sanda.datafi.annotations.query.WithQueryScripts;
+import dev.sanda.datafi.code_generator.annotated_element_specs.EntityDalSpec;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -32,20 +32,17 @@ import static com.google.common.collect.Maps.immutableEntry;
 public class CustomSQLQueryFactory {
 
     @NonNull
-    private ProcessingEnvironment env;
+    private final ProcessingEnvironment env;
 
-    private Map<TypeElement, Map<String, TypeName>> entitiesFields;
-
-    public Map<TypeElement, List<MethodSpec>> constructCustomQueries(Set<? extends TypeElement> entities) {
-        entitiesFields = DatafiStaticUtils.getEntitiesFieldsMap(entities);
+    public Map<TypeElement, List<MethodSpec>> constructCustomQueries(List<EntityDalSpec> entityDalSpecs) {
         Map<TypeElement, List<MethodSpec>> customQueriesMap = new HashMap<>();
-        for (TypeElement entity : entities) {
-            List<CustomSQLQuery> customQueries = getCustomSQLQueries(entity);
-            List<MethodSpec> customQuerieMethodSpecs = new ArrayList<>();
+        for (val entitySpec : entityDalSpecs) {
+            List<CustomSQLQuery> customQueries = getCustomSQLQueries(entitySpec);
+            List<MethodSpec> customQueriesMethodSpecs = new ArrayList<>();
             for (CustomSQLQuery query : customQueries) {
-                customQuerieMethodSpecs.add(generateCustomQueryMethod(query));
+                customQueriesMethodSpecs.add(generateCustomQueryMethod(query));
             }
-            customQueriesMap.put(entity, customQuerieMethodSpecs);
+            customQueriesMap.put(entitySpec.getElement(), customQueriesMethodSpecs);
         }
         return customQueriesMap;
     }
@@ -63,41 +60,40 @@ public class CustomSQLQueryFactory {
                 .build();
     }
 
-    private List<CustomSQLQuery> getCustomSQLQueries(TypeElement entity) {
-        entitiesFields.put(entity, resolveFieldTypesOf(entity));
-        final WithQuery[] individualQueries = entity.getAnnotationsByType(WithQuery.class);
-        final WithNativeQuery[] individualNativeQueries = entity.getAnnotationsByType(WithNativeQuery.class);
-        final WithQueryScripts queryScripts = entity.getAnnotation(WithQueryScripts.class);
-        final WithNativeQueryScripts nativeQueryScripts = entity.getAnnotation(WithNativeQueryScripts.class);
-        List<CustomSQLQuery> customSQLQueries = new ArrayList<>();
+    private List<CustomSQLQuery> getCustomSQLQueries(EntityDalSpec entityDalSpec) {
+        val individualQueries = entityDalSpec.getAnnotationsByType(WithQuery.class);
+        val individualNativeQueries = entityDalSpec.getAnnotationsByType(WithNativeQuery.class);
+        val queryScripts = entityDalSpec.getAnnotation(WithQueryScripts.class);
+        val nativeQueryScripts = entityDalSpec.getAnnotation(WithNativeQueryScripts.class);
+        val customSQLQueries = new ArrayList<CustomSQLQuery>();
 
         if (individualQueries != null) {
             for (WithQuery query : individualQueries) {
-                customSQLQueries.add(parseQuery(query.name(), query.jpql(), entity));
+                customSQLQueries.add(parseQuery(query.name(), query.jpql(), entityDalSpec));
             }
         }
 
         if (individualNativeQueries != null) {
             for (WithNativeQuery query : individualNativeQueries) {
-                customSQLQueries.add(parseIndividualNativeQuery(query.name(), query.sql(), entity));
+                customSQLQueries.add(parseIndividualNativeQuery(query.name(), query.sql(), entityDalSpec));
             }
         }
 
         if (queryScripts != null) {
             for (String scriptPath : queryScripts.value()) {
-                customSQLQueries.add(parseQueryScript(scriptPath, entity));
+                customSQLQueries.add(parseQueryScript(scriptPath, entityDalSpec));
             }
         }
 
         if (nativeQueryScripts != null) {
             for (String scriptPath : nativeQueryScripts.value()) {
-                customSQLQueries.add(parseQueryScript(scriptPath, entity));
+                customSQLQueries.add(parseQueryScript(scriptPath, entityDalSpec));
             }
         }
         return customSQLQueries;
     }
 
-    private CustomSQLQuery parseQueryScript(String path, TypeElement entity) {
+    private CustomSQLQuery parseQueryScript(String path, EntityDalSpec entityDalSpec) {
         //get file
         final ClassPathResource resource = new ClassPathResource(path);
         //validate and assign filename as query name
@@ -107,7 +103,7 @@ public class CustomSQLQueryFactory {
         //set nativeQuery flag
         boolean nativeQuery = determineIfIsNativeQuery(path);
         //set isNativeQuery
-        CustomSQLQuery result = parseQuery(name, sql, entity);
+        CustomSQLQuery result = parseQuery(name, sql, entityDalSpec);
         result.setNative(nativeQuery);
         return result;
     }
@@ -121,15 +117,15 @@ public class CustomSQLQueryFactory {
         }
     }
 
-    private CustomSQLQuery parseIndividualNativeQuery(String name, String sql, TypeElement entity) {
-        CustomSQLQuery customSQLQuery = parseQuery(name, sql, entity);
+    private CustomSQLQuery parseIndividualNativeQuery(String name, String sql, EntityDalSpec entityDalSpec) {
+        CustomSQLQuery customSQLQuery = parseQuery(name, sql, entityDalSpec);
         customSQLQuery.setNative(true);
         return customSQLQuery;
     }
 
-    private CustomSQLQuery parseQuery(String name, String sql, TypeElement entity) {
+    private CustomSQLQuery parseQuery(String name, String sql, EntityDalSpec entity) {
         CustomSQLQuery customSQLQuery = new CustomSQLQuery();
-        customSQLQuery.setAnnotatedEntity(entity);
+        customSQLQuery.setAnnotatedEntity(entity.getElement());
         customSQLQuery.setName(formatAndValidateName(name));
         String sqlString = parseSqlString(sql, customSQLQuery.getArgs(), entity);
         customSQLQuery.setSql(sqlString);
@@ -146,7 +142,7 @@ public class CustomSQLQueryFactory {
         return isUnique ? ReturnPlurality.SINGLE : ReturnPlurality.BATCH;
     }
 
-    private String parseSqlString(String sql, LinkedHashMap<String, TypeName> args, TypeElement entity) {
+    private String parseSqlString(String sql, LinkedHashMap<String, TypeName> args, EntityDalSpec entity) {
         String lineSeparator = System.getProperty("line.separator");
         String formattedSqlString =
                 sql
@@ -157,7 +153,7 @@ public class CustomSQLQueryFactory {
         StringBuilder finalSql = new StringBuilder();
         Map.Entry<String, TypeName> arg;
         for (String lexeme : lexemes) {
-            if ((arg = parseLexemeForArg(lexeme, args, entitiesFields.get(entity))) != null) {
+            if ((arg = parseLexemeForArg(lexeme, args, entity.getEntityFieldTypes())) != null) {
                 args.putIfAbsent(arg.getKey(), arg.getValue());
                 finalSql.append(" :").append(arg.getKey());
             } else {

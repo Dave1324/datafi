@@ -12,7 +12,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * data and web layers to fetch a collection of the given entity by the value of the annotated field (passed as an argument).
  */
 
-@Target({FIELD, TYPE, ANNOTATION_TYPE})
+@Target({FIELD, TYPE, ANNOTATION_TYPE, METHOD})
 @Retention(RUNTIME)
 public @interface FindAllBy {
 }

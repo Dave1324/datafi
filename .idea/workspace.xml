@@ -5,40 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/AutoSynchronized.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/relationship_synchronization/BackpointerType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/relationship_synchronization/EntityRelationshipSyncronizer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/runtime_services/CollectionInstantiator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/runtime_services/CollectionsTypeResolver.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/dave01.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/dave01.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/EntityApiConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/AnnotatedElementSpec.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/EntityDalSpec.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/FieldDalSpec.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/query/WithNativeQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/query/WithNativeQuery.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/query/WithQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/query/WithQuery.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/AutoSynchronized.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/AutoSynchronized.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/IsNonNullable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/IsNonNullable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/NonApiUpdatable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/NonApiUpdatable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/NonNullable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/NonNullable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindAllBy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindAllBy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindBy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindBy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindByUnique.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindByUnique.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/AnnotationProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/AnnotationProcessor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DaoFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DaoFactory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DataManagerFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DataManagerFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FindByFieldsResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FindByFieldsResolver.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQuery.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/Page.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/dto/PageRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/Archivable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/Archivable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/BasePersistableEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/BasePersistableEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/GenericDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/GenericDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/IdFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/IdFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/SequenceGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/SequenceGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/SimpleId.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/persistence/SimpleId.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedElementCollectionField.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/cached_type_info/CachedElementCollectionField.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityField.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/cached_type_info/CachedEntityField.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedEntityTypeInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/cached_type_info/CachedEntityTypeInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/CachedMapElementCollectionField.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/cached_type_info/CachedMapElementCollectionField.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/ElementCollectionTypeResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/runtime_services/ElementCollectionTypeResolver.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/ReflectionCache.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/runtime_services/ReflectionCache.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,9 +55,9 @@
         <option value="JUnit5 Test Class" />
         <option value="Arquillian JUnit Test Class" />
         <option value="Enum" />
-        <option value="Class" />
         <option value="Interface" />
         <option value="AnnotationType" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -136,6 +120,19 @@
     </key>
   </component>
   <component name="RunManager">
+    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="CLASS" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="mvnDebug1" type="Remote">
       <module name="datafi" />
       <option name="USE_SOCKET_TRANSPORT" value="true" />
@@ -245,7 +242,9 @@
       <workItem from="1607941281341" duration="597000" />
       <workItem from="1608899490883" duration="9000" />
       <workItem from="1609097480855" duration="19000" />
-      <workItem from="1610219239212" duration="1913000" />
+      <workItem from="1610219239212" duration="2478000" />
+      <workItem from="1610299660865" duration="2734000" />
+      <workItem from="1611154379233" duration="8708000" />
     </task>
     <servers />
   </component>

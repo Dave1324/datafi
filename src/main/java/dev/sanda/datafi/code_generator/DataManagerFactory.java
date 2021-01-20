@@ -5,6 +5,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import dev.sanda.datafi.DatafiStaticUtils;
+import dev.sanda.datafi.code_generator.annotated_element_specs.EntityDalSpec;
 import dev.sanda.datafi.service.DataManager;
 import lombok.Data;
 import lombok.NonNull;
@@ -14,7 +15,6 @@ import org.springframework.context.annotation.Primary;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
 
 @Data
 public class DataManagerFactory {
@@ -26,11 +26,11 @@ public class DataManagerFactory {
     private TypeSpec.Builder dataManagersConfig = initDataManagerConfig();
     private final static ClassName dataManagerType = ClassName.get(DataManager.class);
 
-    public void addDataManager(TypeElement entity) {
-        final ClassName entityType = ClassName.get(entity);
+    public void addDataManager(EntityDalSpec entityDalSpec) {
+        final ClassName entityType = ClassName.get(entityDalSpec.getElement());
         MethodSpec.Builder builder =
                 MethodSpec
-                        .methodBuilder(DatafiStaticUtils.camelCaseNameOf(entity) + "DataManager")
+                        .methodBuilder(DatafiStaticUtils.camelCaseNameOf(entityDalSpec.getElement()) + "DataManager")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Bean.class)
                         .returns(ParameterizedTypeName.get(dataManagerType, entityType))

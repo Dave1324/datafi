@@ -7,6 +7,8 @@ import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.annotations.finders.FindAllBy;
 import dev.sanda.datafi.annotations.finders.FindBy;
 import dev.sanda.datafi.annotations.finders.FindByUnique;
+import dev.sanda.datafi.code_generator.annotated_element_specs.EntityDalSpec;
+import dev.sanda.datafi.code_generator.annotated_element_specs.FieldDalSpec;
 import dev.sanda.datafi.persistence.GenericDao;
 import lombok.Data;
 import lombok.NonNull;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.persistence.Column;
 import java.util.Collection;
 import java.util.List;
@@ -30,20 +31,12 @@ public class DaoFactory {
     @NonNull
     private ProcessingEnvironment processingEnv;
 
-    /**
-     * generate the actual '<entity name>Dao.java' jpa repository for a given entity
-     *
-     * @param entity              - the given data model entity / table
-     * @param annotatedFieldsMap  - a reference telling us whether this repository needs any custom
-     * @param customSQLQueriesMap
-     */
     protected void generateDao(
-            TypeElement entity,
-            Map<TypeElement, List<VariableElement>> annotatedFieldsMap,
+            EntityDalSpec entityDalSpec,
             Map<TypeElement, List<MethodSpec>> customSQLQueriesMap,
             Map<TypeElement, MethodSpec> freeTextSearchMethods) {
 
-        String className = entity.getQualifiedName().toString();
+        String className = entityDalSpec.getElement().getQualifiedName().toString();
         int lastDot = className.lastIndexOf('.');
         String packageName = className.substring(0, lastDot);
         String simpleClassName = className.substring(lastDot + 1);
@@ -52,43 +45,50 @@ public class DaoFactory {
         TypeSpec.Builder builder = TypeSpec.interfaceBuilder(repositoryName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Repository.class)
-                .addSuperinterface(get(ClassName.get(GenericDao.class), DatafiStaticUtils.getIdType(entity, processingEnv), ClassName.get(entity)));
-        Collection<VariableElement> annotatedFields = annotatedFieldsMap.get(entity);
+                .addSuperinterface(
+                        get(ClassName.get(GenericDao.class),
+                        DatafiStaticUtils.getIdType(entityDalSpec.getElement(), processingEnv),
+                        ClassName.get(entityDalSpec.getElement()))
+                );
+        Collection<FieldDalSpec> annotatedFields = entityDalSpec.getFieldDalSpecs();
         if (annotatedFields != null)
-            annotatedFields.forEach(annotatedField -> handleAnnotatedField(entity, builder, annotatedField));
-        if (customSQLQueriesMap.get(entity) != null)
-            customSQLQueriesMap.get(entity).forEach(builder::addMethod);
-        if (freeTextSearchMethods.get(entity) != null)
-            builder.addMethod(freeTextSearchMethods.get(entity));
-        DatafiStaticUtils.writeToJavaFile(entity.getSimpleName().toString(), packageName, builder, processingEnv, "JpaRepository");
+            annotatedFields.forEach(annotatedField -> handleAnnotatedField(entityDalSpec, builder, annotatedField));
+        if (customSQLQueriesMap.get(entityDalSpec.getElement()) != null)
+            customSQLQueriesMap.get(entityDalSpec.getElement()).forEach(builder::addMethod);
+        if (freeTextSearchMethods.get(entityDalSpec.getElement()) != null)
+            builder.addMethod(freeTextSearchMethods.get(entityDalSpec.getElement()));
+        DatafiStaticUtils.writeToJavaFile(entityDalSpec.getSimpleName(), packageName, builder, processingEnv, "JpaRepository");
     }
 
-    private void handleAnnotatedField(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
-        if (isFindBy(annotatedField))
-            handleFindBy(entity, builder, annotatedField);
-        if (isFindAllBy(annotatedField))
-            handleFindAllBy(entity, builder, annotatedField);
-        if (isFindByUnique(annotatedField))
-            handleFindByUnique(entity, builder, annotatedField);
+    private void handleAnnotatedField(EntityDalSpec entityDalSpec, TypeSpec.Builder builder, FieldDalSpec fieldDalSpec) {
+        if (isFindBy(fieldDalSpec))
+            handleFindBy(entityDalSpec, builder, fieldDalSpec);
+        if (isFindAllBy(fieldDalSpec))
+            handleFindAllBy(entityDalSpec, builder, fieldDalSpec);
+        if (isFindByUnique(fieldDalSpec))
+            handleFindByUnique(entityDalSpec, builder, fieldDalSpec);
     }
 
-    private boolean isFindByUnique(VariableElement annotatedField) {
-        return isDirectlyOrIndirectlyAnnotatedAs(annotatedField, FindByUnique.class);
+    private boolean isFindByUnique(FieldDalSpec annotatedField) {
+        return isDirectlyOrIndirectlyAnnotatedAs(annotatedField.getElement(), FindByUnique.class) ||
+               annotatedField.hasAnnotation(FindByUnique.class);
     }
 
-    private boolean isFindAllBy(VariableElement annotatedField) {
-        return isDirectlyOrIndirectlyAnnotatedAs(annotatedField, FindAllBy.class);
+    private boolean isFindAllBy(FieldDalSpec annotatedField) {
+        return isDirectlyOrIndirectlyAnnotatedAs(annotatedField.getElement(), FindAllBy.class) ||
+               annotatedField.hasAnnotation(FindAllBy.class);
     }
 
-    private boolean isFindBy(VariableElement annotatedField) {
-        return isDirectlyOrIndirectlyAnnotatedAs(annotatedField, FindBy.class);
+    private boolean isFindBy(FieldDalSpec annotatedField) {
+        return  isDirectlyOrIndirectlyAnnotatedAs(annotatedField.getElement(), FindBy.class) ||
+                annotatedField.hasAnnotation(FindBy.class);
     }
 
-    private void handleFindByUnique(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
+    private void handleFindByUnique(EntityDalSpec entityDalSpec, TypeSpec.Builder builder, FieldDalSpec annotatedField) {
         if (isFindBy(annotatedField)) {
-            DatafiStaticUtils.logCompilationError(processingEnv, annotatedField, "@FindBy and @FindByUnique cannot by definition be used together");
+            DatafiStaticUtils.logCompilationError(processingEnv, annotatedField.getElement(), "@FindBy and @FindByUnique cannot by definition be used together");
         } else if (annotatedField.getAnnotation(Column.class) == null || !annotatedField.getAnnotation(Column.class).unique()) {
-            DatafiStaticUtils.logCompilationError(processingEnv, annotatedField, "In order to use @FindByUnique on a field, annotate the field as @Column(unique = true)");
+            DatafiStaticUtils.logCompilationError(processingEnv, annotatedField.getElement(), "In order to use @FindByUnique on a field, annotate the field as @Column(unique = true)");
         } else {
             builder
                     .addMethod(MethodSpec
@@ -96,36 +96,36 @@ public class DaoFactory {
                                     "findBy" + DatafiStaticUtils.toPascalCase(annotatedField.getSimpleName().toString()))
                             .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                             .addParameter(
-                                    ClassName.get(annotatedField.asType()),
+                                    ClassName.get(annotatedField.getElement().asType()),
                                     annotatedField.getSimpleName().toString())
-                            .returns(get(ClassName.get(Optional.class), ClassName.get(entity)))
+                            .returns(get(ClassName.get(Optional.class), ClassName.get(entityDalSpec.getElement())))
                             .build());
         }
     }
 
-    private void handleFindAllBy(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
+    private void handleFindAllBy(EntityDalSpec entityDalSpec, TypeSpec.Builder builder, FieldDalSpec annotatedField) {
         builder
                 .addMethod(MethodSpec
                         .methodBuilder(
-                                "findAllBy" + DatafiStaticUtils.toPascalCase(annotatedField.getSimpleName().toString()) + "In")
+                                "findAllBy" + DatafiStaticUtils.toPascalCase(annotatedField.getSimpleName()) + "In")
                         .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                         .addParameter(
-                                get(ClassName.get(List.class), ClassName.get(annotatedField.asType())),
-                                DatafiStaticUtils.toPlural(annotatedField.getSimpleName().toString()))
-                        .returns(get(ClassName.get(List.class), ClassName.get(entity)))
+                                get(ClassName.get(List.class), ClassName.get(annotatedField.getElement().asType())),
+                                DatafiStaticUtils.toPlural(annotatedField.getSimpleName()))
+                        .returns(get(ClassName.get(List.class), ClassName.get(entityDalSpec.getElement())))
                         .build());
     }
 
-    private void handleFindBy(TypeElement entity, TypeSpec.Builder builder, VariableElement annotatedField) {
+    private void handleFindBy(EntityDalSpec entityDalSpec, TypeSpec.Builder builder, FieldDalSpec annotatedField) {
         builder
                 .addMethod(MethodSpec
                         .methodBuilder(
-                                "findBy" + DatafiStaticUtils.toPascalCase(annotatedField.getSimpleName().toString()))
+                                "findBy" + DatafiStaticUtils.toPascalCase(annotatedField.getSimpleName()))
                         .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                         .addParameter(
-                                ClassName.get(annotatedField.asType()),
-                                annotatedField.getSimpleName().toString())
-                        .returns(get(ClassName.get(List.class), ClassName.get(entity)))
+                                ClassName.get(annotatedField.getElement().asType()),
+                                annotatedField.getSimpleName())
+                        .returns(get(ClassName.get(List.class), ClassName.get(entityDalSpec.getElement())))
                         .build());
     }
 }
