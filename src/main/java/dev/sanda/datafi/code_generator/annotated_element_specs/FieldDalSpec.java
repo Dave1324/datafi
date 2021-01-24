@@ -10,6 +10,9 @@ import dev.sanda.datafi.annotations.finders.FindByUnique;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Id;
 import java.lang.annotation.Annotation;
 
 public class FieldDalSpec extends AnnotatedElementSpec<VariableElement>{
@@ -33,7 +36,10 @@ public class FieldDalSpec extends AnnotatedElementSpec<VariableElement>{
                 NonNullable.class,
                 FindAllBy.class,
                 FindBy.class,
-                FindByUnique.class
+                FindByUnique.class,
+                Id.class,
+                EmbeddedId.class,
+                Column.class
         };
     }
 

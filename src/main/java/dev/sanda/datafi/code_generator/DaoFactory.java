@@ -18,6 +18,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Id;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +89,7 @@ public class DaoFactory {
     private void handleFindByUnique(EntityDalSpec entityDalSpec, TypeSpec.Builder builder, FieldDalSpec annotatedField) {
         if (isFindBy(annotatedField)) {
             DatafiStaticUtils.logCompilationError(processingEnv, annotatedField.getElement(), "@FindBy and @FindByUnique cannot by definition be used together");
-        } else if (annotatedField.getAnnotation(Column.class) == null || !annotatedField.getAnnotation(Column.class).unique()) {
+        } else if (!isUniqueColumn(annotatedField)) {
             DatafiStaticUtils.logCompilationError(processingEnv, annotatedField.getElement(), "In order to use @FindByUnique on a field, annotate the field as @Column(unique = true)");
         } else {
             builder
@@ -101,6 +103,11 @@ public class DaoFactory {
                             .returns(get(ClassName.get(Optional.class), ClassName.get(entityDalSpec.getElement())))
                             .build());
         }
+    }
+
+    private boolean isUniqueColumn(FieldDalSpec annotatedField) {
+        return  (annotatedField.hasAnnotation(Column.class) && annotatedField.getAnnotation(Column.class).unique()) ||
+                annotatedField.hasAnnotation(Id.class) || annotatedField.hasAnnotation(EmbeddedId.class);
     }
 
     private void handleFindAllBy(EntityDalSpec entityDalSpec, TypeSpec.Builder builder, FieldDalSpec annotatedField) {

@@ -67,7 +67,7 @@ public class CustomSQLQueryFactory {
         val nativeQueryScripts = entityDalSpec.getAnnotation(WithNativeQueryScripts.class);
         val customSQLQueries = new ArrayList<CustomSQLQuery>();
 
-        if (individualQueries != null) {
+        if (!individualQueries.isEmpty()) {
             for (WithQuery query : individualQueries) {
                 customSQLQueries.add(parseQuery(query.name(), query.jpql(), entityDalSpec));
             }

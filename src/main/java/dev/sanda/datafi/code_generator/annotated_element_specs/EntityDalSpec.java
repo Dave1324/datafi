@@ -34,7 +34,8 @@ public class EntityDalSpec extends AnnotatedElementSpec<TypeElement> {
 
     public EntityDalSpec(TypeElement entity, TypeElement entityApiSpec) {
         super(entity);
-        addAnnotations(entityApiSpec);
+        if(entityApiSpec != null)
+            addAnnotations(entityApiSpec);
         setFieldSpecs(entityApiSpec);
     }
 

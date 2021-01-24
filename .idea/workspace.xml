@@ -5,23 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/EntityApiConfiguration.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/AnnotatedElementSpec.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/EntityDalSpec.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/FieldDalSpec.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/AutoSynchronized.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/AutoSynchronized.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/IsNonNullable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/IsNonNullable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/NonApiUpdatable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/NonApiUpdatable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/NonNullable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/NonNullable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindAllBy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindAllBy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindBy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindBy.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindByUnique.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/finders/FindByUnique.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/AnnotationProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/AnnotationProcessor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/EntityApiConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/EntityApiSpec.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DaoFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DaoFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DataManagerFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DataManagerFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/FreeTextSearchMethodsFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/AnnotatedElementSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/AnnotatedElementSpec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/EntityDalSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/EntityDalSpec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/FieldDalSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/FieldDalSpec.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/query/CustomSQLQueryFactory.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -120,19 +110,6 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="CLASS" />
-      <properties />
-      <listeners />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="mvnDebug1" type="Remote">
       <module name="datafi" />
       <option name="USE_SOCKET_TRANSPORT" value="true" />
@@ -245,6 +222,9 @@
       <workItem from="1610219239212" duration="2478000" />
       <workItem from="1610299660865" duration="2734000" />
       <workItem from="1611154379233" duration="8708000" />
+      <workItem from="1611475901853" duration="599000" />
+      <workItem from="1611478581690" duration="1884000" />
+      <workItem from="1611480701725" duration="632000" />
     </task>
     <servers />
   </component>

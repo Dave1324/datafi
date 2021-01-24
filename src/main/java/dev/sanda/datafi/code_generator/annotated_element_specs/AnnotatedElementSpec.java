@@ -5,10 +5,10 @@ import lombok.val;
 
 import javax.lang.model.element.Element;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static dev.sanda.datafi.DatafiStaticUtils.getDirectOrIndirectAnnotation;
+import static dev.sanda.datafi.DatafiStaticUtils.isDirectlyOrIndirectlyAnnotatedAs;
 
 @Getter
 @SuppressWarnings("unchecked")
@@ -27,8 +27,11 @@ public abstract class AnnotatedElementSpec<T extends Element>{
     protected void addAnnotations(Element element) {
         for (Class<? extends Annotation> targetAnnotation : targetAnnotations()) {
             val annotationsByTargetType = element.getAnnotationsByType(targetAnnotation);
-            if (annotationsByTargetType != null) {
+            if (annotationsByTargetType.length > 0) {
                 this.annotations.put(targetAnnotation, Arrays.asList(annotationsByTargetType));
+            }else if(isDirectlyOrIndirectlyAnnotatedAs(element, targetAnnotation)){
+                val annotation = getDirectOrIndirectAnnotation(element, targetAnnotation);
+                this.annotations.put(targetAnnotation, Collections.singletonList(annotation));
             }
         }
 
@@ -39,7 +42,7 @@ public abstract class AnnotatedElementSpec<T extends Element>{
     public <A extends Annotation> List<A> getAnnotationsByType(Class<A> annotationType){
         return  annotations.containsKey(annotationType)
                 ? (List<A>) annotations.get(annotationType)
-                : null;
+                : new ArrayList<>();
     }
 
 

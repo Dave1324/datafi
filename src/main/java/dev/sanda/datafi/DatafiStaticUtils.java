@@ -1,10 +1,11 @@
 package dev.sanda.datafi;
 
+import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import dev.sanda.datafi.annotations.EntityApiConfiguration;
+import dev.sanda.datafi.annotations.EntityApiSpec;
 import dev.sanda.datafi.code_generator.annotated_element_specs.EntityDalSpec;
 import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
@@ -83,6 +84,7 @@ public class DatafiStaticUtils {
     }
 
     public static List<ExecutableElement> getGettersOf(TypeElement entity) {
+        if(entity == null) return new ArrayList<>();
         return entity
                 .getEnclosedElements()
                 .stream()
@@ -196,6 +198,17 @@ public class DatafiStaticUtils {
         return commonPrefix.equals("") ? "" : commonPrefix.substring(0, commonPrefix.lastIndexOf("."));
     }
 
+    public static String pascalCasePackageName(String packageName){
+        packageName = packageName.substring(packageName.lastIndexOf(".") + 1);
+        packageName = Character.toUpperCase(packageName.charAt(0)) + packageName.substring(1);
+        while(packageName.contains("_"))
+            packageName = packageName.replaceFirst(
+                "_[a-z]",
+                String.valueOf(Character.toUpperCase(packageName.charAt(packageName.indexOf("_") + 1)))
+        );
+        return packageName;
+    }
+
     public static String[] getRootElementNames(RoundEnvironment roundEnvironment) {
         return roundEnvironment
                 .getRootElements()
@@ -215,7 +228,7 @@ public class DatafiStaticUtils {
         Map<TypeElement, TypeElement> extensionsMap =
                 ((Set<TypeElement>)
                  roundEnvironment
-                 .getElementsAnnotatedWith(EntityApiConfiguration.class))
+                 .getElementsAnnotatedWith(EntityApiSpec.class))
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
@@ -231,11 +244,43 @@ public class DatafiStaticUtils {
                             entry.getValue().getAnnotation(Entity.class) != null)
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         entities.forEach(entity -> extensionsMap.putIfAbsent(entity, null));
+        for (Map.Entry<TypeElement, TypeElement> typeElementTypeElementEntry : extensionsMap.entrySet()) {
+            extractReferencedEntities(typeElementTypeElementEntry.getKey(), processingEnv)
+                    .forEach(entityReference -> extensionsMap.putIfAbsent(entityReference, null));
+        }
         return extensionsMap
                 .entrySet()
                 .stream()
                 .map(entry -> new EntityDalSpec(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
+    }
+
+    public static Set<TypeElement> extractReferencedEntities(TypeElement entity, ProcessingEnvironment processingEnv) {
+        return  getFieldsOf(entity)
+                .stream()
+                .filter(DatafiStaticUtils::isEntityReference)
+                .map((VariableElement field) -> entityReferenceTYpe(field, processingEnv))
+                .collect(Collectors.toSet());
+    }
+
+    private static TypeElement entityReferenceTYpe(VariableElement field, ProcessingEnvironment processingEnv) {
+        val fieldType = processingEnv.getTypeUtils().asElement(field.asType());
+        if(isAnnotatedAs(field, OneToOne.class) || isAnnotatedAs(field, ManyToOne.class)) {
+            return (TypeElement) fieldType;
+        } else {
+            val asDeclaredType = (DeclaredType)field.asType();
+            return processingEnv.getElementUtils().getTypeElement(asDeclaredType.getTypeArguments().get(0).toString());
+        }
+    }
+
+    private static boolean isAnnotatedAs(Element element, Class<? extends Annotation> annotationType) {
+        return element.getAnnotation(annotationType) != null;
+    }
+
+    private static final Set<Class<? extends Annotation>> JPA_RELATIONS =
+            new HashSet<>(Arrays.asList(OneToOne.class, OneToMany.class, ManyToMany.class, ManyToOne.class));
+    private static boolean isEntityReference(VariableElement field) {
+        return JPA_RELATIONS.stream().anyMatch(jpaAnnotation -> field.getAnnotation(jpaAnnotation) != null);
     }
 
     public static String camelCaseNameOf(Element element) {
@@ -258,11 +303,31 @@ public class DatafiStaticUtils {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    public static Set<? extends TypeElement> getEntitiesSet(RoundEnvironment roundEnvironment) {
+        Set<TypeElement> entities = new HashSet<>();
+        entities.addAll((Collection<? extends TypeElement>) roundEnvironment.getElementsAnnotatedWith(Entity.class));
+        entities.addAll((Collection<? extends TypeElement>) roundEnvironment.getElementsAnnotatedWith(Table.class));
+        return Sets.newHashSet(entities);
+    }
+
     public static boolean isDirectlyOrIndirectlyAnnotatedAs(Element element, Class<? extends Annotation> annotationType) {
         boolean isDirectlyAnnotated = element.getAnnotation(annotationType) != null;
         if (isDirectlyAnnotated) return true;
         return element.getAnnotationMirrors().stream()
                 .anyMatch(am -> am.getAnnotationType().asElement().getAnnotation(annotationType) != null);
+    }
+
+    public static Annotation getDirectOrIndirectAnnotation(Element element, Class<? extends Annotation> annotationType) {
+        val directAnnotation = element.getAnnotation(annotationType);
+        if (directAnnotation != null) return directAnnotation;
+        return element
+                .getAnnotationMirrors()
+                .stream()
+                .filter(am -> am.getAnnotationType().asElement().getAnnotation(annotationType) != null)
+                .map(am -> am.getAnnotationType().asElement().getAnnotation(annotationType))
+                .findFirst()
+                .orElse(null);
     }
 
     //spring framework instantiates proxies for each autowired instance.
