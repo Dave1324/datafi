@@ -11,9 +11,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import static dev.sanda.datafi.DatafiStaticUtils.toPascalCase;
 import static dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo.genDefaultInstance;
 import static dev.sanda.datafi.reflection.relationship_synchronization.BackpointerType.*;
 
@@ -83,6 +87,7 @@ public class EntityRelationshipSyncronizer {
     }
 
     private Class clazz;
+    private Class apiSpec;
     private CollectionsTypeResolver collectionsTypeResolver;
 
     private Map<String, Field> manyToOneBackpointers;
@@ -90,11 +95,11 @@ public class EntityRelationshipSyncronizer {
     private Map<String, Field> oneToManyBackpointers;
     private Map<String, Field> oneToOneBackpointers;
 
-    public EntityRelationshipSyncronizer(Class clazz, CollectionsTypeResolver collectionsTypeResolver){
+    public EntityRelationshipSyncronizer(Class clazz, Class<?> apiSpec, CollectionsTypeResolver collectionsTypeResolver){
 
         this.clazz = clazz;
+        this.apiSpec = apiSpec;
         this.collectionsTypeResolver = collectionsTypeResolver;
-
         manyToOneBackpointers = new HashMap<>();
         manyToManyBackpointers = new HashMap<>();
         oneToManyBackpointers = new HashMap<>();
@@ -108,8 +113,9 @@ public class EntityRelationshipSyncronizer {
         val blackListedManyToManyBackpointers = new HashSet<String>();
         val blackListedOneToManyBackpointers = new HashSet<String>();
         val blackListedOneToOneBackpointers = new HashSet<String>();
-        for (Field field : clazz.getDeclaredFields()) {
-            if(isIrrelevantField(field)) continue;
+        for (Map.Entry<Field, Boolean> entry : getFieldsMap().entrySet()) {
+            if(!entry.getValue()) continue;
+            Field field = entry.getKey();
             if(field.isAnnotationPresent(ManyToOne.class))
                 setBackpointerForAnnotationType(field, ManyToOne.class, blackListedManyToOneBackpointers, manyToOneBackpointers);
             else if(field.isAnnotationPresent(ManyToMany.class))
@@ -121,11 +127,44 @@ public class EntityRelationshipSyncronizer {
         }
     }
 
+    private Map<Field, Boolean> getFieldsMap() {
+        Map<String, Field> fieldsByPascalCaseName = Arrays.stream(this.clazz.getDeclaredFields())
+                .collect(Collectors.toMap(field -> toPascalCase(field.getName()), Function.identity()));
+        if(this.apiSpec == null)
+            return Arrays.stream(this.clazz.getDeclaredFields())
+                    .collect(Collectors.toMap(Function.identity(), field -> !isIrrelevantField(field)));
+        else {
+            Map<String, Method> apiSpecGettersByFieldName = Arrays.stream(this.apiSpec.getDeclaredMethods())
+                    .filter(method ->
+                                    method.getName().startsWith("get") &&
+                                    fieldsByPascalCaseName.containsKey(method.getName().replaceFirst("get", "")))
+                    .collect(Collectors.toMap(
+                            method -> fieldsByPascalCaseName.get(method.getName().replaceFirst("get", "")).getName(),
+                            Function.identity()
+                    ));
+            return Arrays.stream(this.clazz.getDeclaredFields())
+                    .collect(Collectors.toMap(
+                       Function.identity(),
+                       field -> !isIrrelevantField(field, apiSpecGettersByFieldName.get(field.getName()))
+                    ));
+        }
+    }
+
     private boolean isIrrelevantField(Field field) {
+        return isIrrelevantField(field, null);
+    }
+
+    private boolean isIrrelevantField(Field field, Method apiSpecGetter) {
         return
-                Map.class.isAssignableFrom(field.getType()) ||
-                !(field.isAnnotationPresent(AutoSynchronized.class) ||
-                  field.getDeclaringClass().isAnnotationPresent(AutoSynchronized.class));
+            Map.class.isAssignableFrom(field.getType()) ||
+            !(
+                    field.isAnnotationPresent(AutoSynchronized.class) ||
+                    field.getDeclaringClass().isAnnotationPresent(AutoSynchronized.class) ||
+                    (
+                        apiSpecGetter != null && apiSpecGetter.isAnnotationPresent(AutoSynchronized.class) ||
+                        apiSpecGetter != null && apiSpecGetter.getDeclaringClass().isAnnotationPresent(AutoSynchronized.class)
+                    )
+            );
     }
 
     private void setBackpointerForAnnotationType(Field field, Class annotationType, Set<String> blacklist, Map<String, Field> backpointers){

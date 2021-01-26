@@ -2,12 +2,13 @@ package dev.sanda.datafi.reflection.runtime_services;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import dev.sanda.datafi.reflection.relationship_synchronization.EntityRelationshipSyncronizer;
+import dev.sanda.datafi.annotations.EntityApiSpec;
+import dev.sanda.datafi.code_generator.BasePackageResolver;
 import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
+import dev.sanda.datafi.reflection.relationship_synchronization.EntityRelationshipSyncronizer;
 import lombok.Getter;
 import lombok.NonNull;
 import org.reflections.Reflections;
-import dev.sanda.datafi.code_generator.BasePackageResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,10 @@ import javax.persistence.Table;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static dev.sanda.datafi.DatafiStaticUtils.hasOneOfAnnotations;
 
 @Component
 public class ReflectionCache {
@@ -39,6 +44,7 @@ public class ReflectionCache {
         entitiesCache = new HashMap<>();
         resolversCache = new HashMap<>();
         Set<Class<?>> dataModelEntityTypes = getAnnotatedEntities();
+        Map<Class<?>, Class<?>> dataModelEntityTypeApiSpecs = getAnnotatedEntityTypeApiSpecs();
         for (Class<?> currentType : dataModelEntityTypes) {
             if (isPersistableEntity(currentType))
                 entitiesCache.put(
@@ -47,7 +53,11 @@ public class ReflectionCache {
                                 currentType,
                                 getClassFields(currentType),
                                 getPublicMethodsOf(currentType),
-                                new EntityRelationshipSyncronizer(currentType, collectionsTypeResolver)));
+                                new EntityRelationshipSyncronizer(
+                                        currentType,
+                                        dataModelEntityTypeApiSpecs.get(currentType),
+                                        collectionsTypeResolver))
+                );
         }
     }
 
@@ -60,6 +70,14 @@ public class ReflectionCache {
         entities.addAll(reflections.getTypesAnnotatedWith(Table.class));
         entities = Sets.newHashSet(entities);
         return entities;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Class<?>, Class<?>> getAnnotatedEntityTypeApiSpecs() {
+        return  reflections.getTypesAnnotatedWith(EntityApiSpec.class)
+                .stream()
+                .filter(clazz -> hasOneOfAnnotations(clazz.getSuperclass(), Entity.class, Table.class))
+                .collect(Collectors.toMap(Class::getSuperclass, Function.identity()));
     }
 
     private Collection<Method> getPublicMethodsOf(@NonNull Class<?> startClass) {

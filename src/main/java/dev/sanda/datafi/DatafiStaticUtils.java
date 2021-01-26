@@ -390,6 +390,10 @@ public class DatafiStaticUtils {
         return Arrays.stream(annotationTypes).anyMatch(type -> element.getAnnotation(type) != null);
     }
 
+    public static boolean hasOneOfAnnotations(Class<?> clazz, Class<? extends Annotation>... annotationTypes) {
+        return Arrays.stream(annotationTypes).anyMatch(clazz::isAnnotationPresent);
+    }
+
     public static boolean hasOneOfAnnotations(Field field, Class<? extends Annotation>... annotationTypes) {
         return Arrays.stream(annotationTypes).anyMatch(field::isAnnotationPresent);
     }
