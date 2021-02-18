@@ -11,6 +11,7 @@ import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.runtime_services.ReflectionCache;
 import lombok.val;
+import lombok.var;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import org.hibernate.proxy.HibernateProxy;
@@ -244,10 +245,12 @@ public class DatafiStaticUtils {
                             entry.getValue().getAnnotation(Entity.class) != null)
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         entities.forEach(entity -> extensionsMap.putIfAbsent(entity, null));
+        Map<TypeElement, TypeElement> temp = new HashMap<>();
         for (Map.Entry<TypeElement, TypeElement> typeElementTypeElementEntry : extensionsMap.entrySet()) {
             extractReferencedEntities(typeElementTypeElementEntry.getKey(), processingEnv)
-                    .forEach(entityReference -> extensionsMap.putIfAbsent(entityReference, null));
+                    .forEach(entityReference -> temp.putIfAbsent(entityReference, null));
         }
+        temp.forEach(extensionsMap::putIfAbsent);
         return extensionsMap
                 .entrySet()
                 .stream()
@@ -396,5 +399,40 @@ public class DatafiStaticUtils {
 
     public static boolean hasOneOfAnnotations(Field field, Class<? extends Annotation>... annotationTypes) {
         return Arrays.stream(annotationTypes).anyMatch(field::isAnnotationPresent);
+    }
+
+    public static List<String> getModelPackageNames(List<EntityDalSpec> entitySpecs) {
+        val qualifiedNames = entitySpecs
+                .stream()
+                .map(entityDalSpec -> entityDalSpec.getElement().getQualifiedName().toString())
+                .sorted(String::compareTo)
+                .collect(Collectors.toList());
+        var commonPrefix = StringUtils.getCommonPrefix(qualifiedNames.stream().toArray(String[]::new));
+        if(commonPrefix.endsWith("."))
+            commonPrefix = commonPrefix.substring(0, commonPrefix.lastIndexOf("."));
+        if(!commonPrefix.equals(""))
+            return Collections.singletonList(commonPrefix);
+        Set<String> currentGrouping = new HashSet<>();
+        Set<String> prefixes = new HashSet<>();
+        for (int i = 0, qualifiedNamesSize = qualifiedNames.size(); i < qualifiedNamesSize; i++) {
+            String name = qualifiedNames.get(i);
+            currentGrouping.add(name);
+            val commonGroupPrefix = StringUtils.getCommonPrefix(currentGrouping.stream().toArray(String[]::new));
+            if (commonGroupPrefix.equals("")) {
+                currentGrouping.remove(name);
+                i--;
+                var newFinalPrefix = StringUtils.getCommonPrefix(currentGrouping.stream().toArray(String[]::new));
+                if (newFinalPrefix.endsWith("."))
+                    newFinalPrefix = newFinalPrefix.substring(0, newFinalPrefix.lastIndexOf("."));
+                prefixes.add(newFinalPrefix);
+                currentGrouping = new HashSet<>();
+            }else if(i + 1 >= qualifiedNamesSize && !currentGrouping.isEmpty()){
+                var newFinalPrefix = StringUtils.getCommonPrefix(currentGrouping.stream().toArray(String[]::new));
+                if (newFinalPrefix.endsWith("."))
+                    newFinalPrefix = newFinalPrefix.substring(0, newFinalPrefix.lastIndexOf("."));
+                prefixes.add(newFinalPrefix);
+            }
+        }
+        return new ArrayList<>(prefixes);
     }
 }

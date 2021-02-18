@@ -5,10 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/MainClass.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/TransientModule.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DaoAggregatorFactory.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/DatafiStaticUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/AutoSynchronized.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/annotations/attributes/AutoSynchronized.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/AnnotationProcessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/AnnotationProcessor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/BasePackageResolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/BasePackageResolver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DataManagerFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/DataManagerFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/AnnotatedElementSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/AnnotatedElementSpec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/EntityDalSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/EntityDalSpec.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/FieldDalSpec.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/code_generator/annotated_element_specs/FieldDalSpec.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/relationship_synchronization/EntityRelationshipSyncronizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/relationship_synchronization/EntityRelationshipSyncronizer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/runtime_services/ReflectionCache.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/runtime_services/ReflectionCache.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DaoCollector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DaoCollector.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,8 +54,8 @@
         <option value="Arquillian JUnit Test Class" />
         <option value="Enum" />
         <option value="Interface" />
-        <option value="AnnotationType" />
         <option value="Class" />
+        <option value="AnnotationType" />
       </list>
     </option>
   </component>
@@ -114,17 +126,6 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="mvnDebug1" type="Remote">
       <module name="datafi" />
       <option name="USE_SOCKET_TRANSPORT" value="true" />
@@ -240,6 +241,8 @@
       <workItem from="1611475901853" duration="599000" />
       <workItem from="1611478581690" duration="1884000" />
       <workItem from="1611480701725" duration="632000" />
+      <workItem from="1612086120952" duration="6411000" />
+      <workItem from="1613583066138" duration="7000" />
     </task>
     <servers />
   </component>

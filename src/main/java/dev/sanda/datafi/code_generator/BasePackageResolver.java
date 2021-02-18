@@ -1,10 +1,12 @@
 package dev.sanda.datafi.code_generator;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NonNull;
+
+import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class BasePackageResolver {
-    @NonNull
-    private String basePackage;
+    private List<String> basePackages;
 }

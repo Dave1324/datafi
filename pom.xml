@@ -17,7 +17,7 @@
     </parent>
 
     <artifactId>datafi</artifactId>
-    <version>0.1.0.BETA</version>
+    <version>0.1.0</version>
 
     <dependencies>
         <dependency>
@@ -38,6 +38,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>${commons-collections4.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

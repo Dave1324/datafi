@@ -35,7 +35,7 @@ public class EntityRelationshipSyncronizer {
             switch (Objects.requireNonNull(backpointerType)){
                 case ONE_TO_MANY:{
                     if(!oneToManyBackpointers.containsKey(fieldTypeName)) break;
-                    targetField = oneToManyBackpointers.get(fieldTypeName);
+                    targetField = getTargetField(sourceField, fieldTypeName, oneToManyBackpointers);
                     val targetFieldValue = getOrInstantiateCollection(targetField, thisInstance);
                     targetFieldValue.add(toPointTo);
                     success = true;
@@ -43,7 +43,7 @@ public class EntityRelationshipSyncronizer {
                 break;
                 case MANY_TO_MANY:{
                     if(!manyToManyBackpointers.containsKey(fieldTypeName)) break;
-                    targetField = manyToManyBackpointers.get(fieldTypeName);
+                    targetField = getTargetField(sourceField, fieldTypeName, manyToManyBackpointers);
                     val targetFieldValue = getOrInstantiateCollection(targetField, thisInstance);
                     targetFieldValue.add(toPointTo);
                     success = true;
@@ -51,13 +51,13 @@ public class EntityRelationshipSyncronizer {
                 break;
                 case MANY_TO_ONE:{
                     if(!manyToOneBackpointers.containsKey(fieldTypeName)) break;
-                    targetField = manyToOneBackpointers.get(fieldTypeName);
+                    targetField = getTargetField(sourceField, fieldTypeName, manyToOneBackpointers);
                     targetField.set(thisInstance, toPointTo);
                     success = true;
                 }
                 case ONE_TO_ONE:{
                     if(!oneToOneBackpointers.containsKey(fieldTypeName)) break;
-                    targetField = oneToOneBackpointers.get(fieldTypeName);
+                    targetField = getTargetField(sourceField, fieldTypeName, oneToOneBackpointers);
                     targetField.set(thisInstance, toPointTo);
                     success = true;
                 }
@@ -90,10 +90,12 @@ public class EntityRelationshipSyncronizer {
     private Class apiSpec;
     private CollectionsTypeResolver collectionsTypeResolver;
 
-    private Map<String, Field> manyToOneBackpointers;
-    private Map<String, Field> manyToManyBackpointers;
-    private Map<String, Field> oneToManyBackpointers;
-    private Map<String, Field> oneToOneBackpointers;
+    private Map<String, Map<String, Field>> manyToOneBackpointers;
+    private Map<String, Map<String, Field>> manyToManyBackpointers;
+    private Map<String, Map<String, Field>> oneToManyBackpointers;
+    private Map<String, Map<String, Field>> oneToOneBackpointers;
+
+    Map<String, Method> apiSpecGettersByFieldName;
 
     public EntityRelationshipSyncronizer(Class clazz, Class<?> apiSpec, CollectionsTypeResolver collectionsTypeResolver){
 
@@ -104,6 +106,7 @@ public class EntityRelationshipSyncronizer {
         manyToManyBackpointers = new HashMap<>();
         oneToManyBackpointers = new HashMap<>();
         oneToOneBackpointers = new HashMap<>();
+        apiSpecGettersByFieldName = new HashMap<>();
 
         populateBackpointerMaps();
     }
@@ -113,28 +116,34 @@ public class EntityRelationshipSyncronizer {
         val blackListedManyToManyBackpointers = new HashSet<String>();
         val blackListedOneToManyBackpointers = new HashSet<String>();
         val blackListedOneToOneBackpointers = new HashSet<String>();
-        for (Map.Entry<Field, Boolean> entry : getFieldsMap().entrySet()) {
-            if(!entry.getValue()) continue;
+        for (val entry : getFieldsMap().entrySet()) {
             Field field = entry.getKey();
             if(field.isAnnotationPresent(ManyToOne.class))
-                setBackpointerForAnnotationType(field, ManyToOne.class, blackListedManyToOneBackpointers, manyToOneBackpointers);
+                setBackpointerForAnnotationType(field, entry.getValue(), ManyToOne.class, blackListedManyToOneBackpointers, manyToOneBackpointers);
             else if(field.isAnnotationPresent(ManyToMany.class))
-                setBackpointerForAnnotationType(field, ManyToMany.class, blackListedManyToManyBackpointers, manyToManyBackpointers);
+                setBackpointerForAnnotationType(field, entry.getValue(),  ManyToMany.class, blackListedManyToManyBackpointers, manyToManyBackpointers);
             else if(field.isAnnotationPresent(OneToMany.class))
-                setBackpointerForAnnotationType(field, OneToMany.class, blackListedOneToManyBackpointers, oneToManyBackpointers);
+                setBackpointerForAnnotationType(field, entry.getValue(), OneToMany.class, blackListedOneToManyBackpointers, oneToManyBackpointers);
             else if(field.isAnnotationPresent(OneToOne.class))
-                setBackpointerForAnnotationType(field, OneToOne.class, blackListedOneToOneBackpointers, oneToOneBackpointers);
+                setBackpointerForAnnotationType(field, entry.getValue(), OneToOne.class, blackListedOneToOneBackpointers, oneToOneBackpointers);
         }
     }
 
-    private Map<Field, Boolean> getFieldsMap() {
+    private Map<Field, String> getFieldsMap() {
         Map<String, Field> fieldsByPascalCaseName = Arrays.stream(this.clazz.getDeclaredFields())
                 .collect(Collectors.toMap(field -> toPascalCase(field.getName()), Function.identity()));
         if(this.apiSpec == null)
             return Arrays.stream(this.clazz.getDeclaredFields())
-                    .collect(Collectors.toMap(Function.identity(), field -> !isIrrelevantField(field)));
+                    .filter(field -> !isIrrelevantField(field))
+                    .collect(Collectors.toMap(
+                            Function.identity(),
+                            field -> isExplicitlyScoped(field, null)
+                                     ? field.getAnnotation(AutoSynchronized.class).referencedBy()
+                                     : ""
+                            )
+                    );
         else {
-            Map<String, Method> apiSpecGettersByFieldName = Arrays.stream(this.apiSpec.getDeclaredMethods())
+            apiSpecGettersByFieldName = Arrays.stream(this.apiSpec.getDeclaredMethods())
                     .filter(method ->
                                     method.getName().startsWith("get") &&
                                     fieldsByPascalCaseName.containsKey(method.getName().replaceFirst("get", "")))
@@ -143,10 +152,14 @@ public class EntityRelationshipSyncronizer {
                             Function.identity()
                     ));
             return Arrays.stream(this.clazz.getDeclaredFields())
+                    .filter(field -> !isIrrelevantField(field, apiSpecGettersByFieldName.get(field.getName())))
                     .collect(Collectors.toMap(
                        Function.identity(),
-                       field -> !isIrrelevantField(field, apiSpecGettersByFieldName.get(field.getName()))
-                    ));
+                       field -> isExplicitlyScoped(field, apiSpecGettersByFieldName.get(field.getName()))
+                               ? getAnnotationInstance(field, apiSpecGettersByFieldName.get(field.getName())).referencedBy()
+                               : ""
+                            )
+                    );
         }
     }
 
@@ -167,24 +180,57 @@ public class EntityRelationshipSyncronizer {
             );
     }
 
-    private void setBackpointerForAnnotationType(Field field, Class annotationType, Set<String> blacklist, Map<String, Field> backpointers){
+    private void setBackpointerForAnnotationType(Field field, String toField, Class annotationType, Set<String> blacklist, Map<String, Map<String, Field>> backpointers){
         val typeName = resolveFieldTypeName(field);
         if(field.isAnnotationPresent(annotationType) && !blacklist.contains(typeName)){
-            if(backpointers.containsKey(typeName)){
-                blacklist.add(typeName);
-                backpointers.remove(typeName);
+            if(backpointers.containsKey(typeName) && !isExplicitlyScoped(field, apiSpecGettersByFieldName.get(field.getName()))){
+                throw new RuntimeException(
+                        "Entity of type " + clazz.getSimpleName() +
+                        " contains multiple instances of @AutoSynchronized" +
+                        " annotation on fields: \"" + field.getName() + "\" and \"" +
+                        backpointers.get(typeName).entrySet().iterator().next().getValue().getName() +
+                        "\" for same referenced type \"" + typeName + "\"." +
+                        "If this is intentional, be sure to set the 'referencedBy' parameter on each annotation instance" +
+                        " so as to remove unresolvable ambiguity as to which field the @AutoSynchronized annotation instances" +
+                        " are each respectively intended to be referring to."
+                );
             }else{
                 field.setAccessible(true);
-                backpointers.put(typeName, field);
+                if(!backpointers.containsKey(typeName)) backpointers.put(typeName, new HashMap<>());
+                backpointers.get(typeName).put(toField, field);
             }
         }
     }
 
+    private boolean isExplicitlyScoped(Field field, Method apiSpecGetter) {
+        val annotationInstance = getAnnotationInstance(field, apiSpecGetter);
+        return annotationInstance != null && !annotationInstance.referencedBy().equals("");
+    }
+
+    private AutoSynchronized getAnnotationInstance(Field field, Method apiSpecGetter){
+        if(apiSpecGetter != null){
+            return  apiSpecGetter.isAnnotationPresent(AutoSynchronized.class)
+                    ? apiSpecGetter.getAnnotation(AutoSynchronized.class)
+                    : field.getAnnotation(AutoSynchronized.class);
+        }
+        return field.getAnnotation(AutoSynchronized.class);
+    }
+
+    private Field getTargetField(Field sourceField, String fieldTypeName, Map<String, Map<String, Field>> backpointersMap){
+        return  backpointersMap.size() == 1
+                ? backpointersMap.get(fieldTypeName).entrySet().iterator().next().getValue()
+                : backpointersMap.get(fieldTypeName).get(sourceField.getName());
+    }
+
     private String resolveFieldTypeName(Field field) {
+        return resolveFieldType(field).getSimpleName();
+    }
+
+    private Class resolveFieldType(Field field){
         val type = field.getType();
         if(!Collection.class.isAssignableFrom(type))
-            return type.getSimpleName();
-        return collectionsTypeResolver.resolveFor(clazz.getSimpleName() + "." + field.getName()).getSimpleName();
+            return type;
+        return collectionsTypeResolver.resolveFor(clazz.getSimpleName() + "." + field.getName());
     }
 
     private Collection getOrInstantiateCollection(Field targetField, Object thisInstance) throws IllegalAccessException {

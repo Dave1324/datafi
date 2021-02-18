@@ -40,7 +40,7 @@ public class ReflectionCache {
 
     @PostConstruct
     private void init() {
-        reflections = new Reflections(basePackageResolver.getBasePackage());
+        reflections = new Reflections(basePackageResolver.getBasePackages());
         entitiesCache = new HashMap<>();
         resolversCache = new HashMap<>();
         Set<Class<?>> dataModelEntityTypes = getAnnotatedEntities();
