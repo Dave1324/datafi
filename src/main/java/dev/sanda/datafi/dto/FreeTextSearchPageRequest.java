@@ -6,5 +6,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class FreeTextSearchPageRequest extends PageRequest {
-    private String searchTerm;
+
+  private String searchTerm;
 }

@@ -1,7 +1,7 @@
 package dev.sanda.datafi.persistence;
 
 public interface Archivable {
-    Boolean getIsArchived();
+  Boolean getIsArchived();
 
-    void setIsArchived(Boolean isArchived);
+  void setIsArchived(Boolean isArchived);
 }

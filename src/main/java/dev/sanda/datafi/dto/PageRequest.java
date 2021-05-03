@@ -1,29 +1,29 @@
 package dev.sanda.datafi.dto;
 
-import lombok.Data;
-import org.springframework.data.domain.Sort;
+import static org.springframework.data.domain.Sort.Direction.ASC;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.springframework.data.domain.Sort.Direction.ASC;
+import lombok.Data;
+import org.springframework.data.domain.Sort;
 
 @Data
 public class PageRequest {
-    private Integer pageNumber;
-    private String sortBy;
-    private Integer pageSize = 25;
-    private Sort.Direction sortDirection = ASC;
-    private Boolean fetchAll = false;
 
-    private Map<String, Object> customArgs = new HashMap<>();
+  private Integer pageNumber;
+  private String sortBy;
+  private Integer pageSize = 25;
+  private Sort.Direction sortDirection = ASC;
+  private Boolean fetchAll = false;
 
-    public boolean isValidPagingRange() {
-        return pageNumber >= 0 && pageSize > 0;
-    }
+  private Map<String, Object> customArgs = new HashMap<>();
 
-    @SuppressWarnings("unchecked")
-    public <T> T getCustomArg(String key) {
-        return customArgs.containsKey(key) ? (T) customArgs.get(key) : null;
-    }
+  public boolean isValidPagingRange() {
+    return pageNumber >= 0 && pageSize > 0;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T getCustomArg(String key) {
+    return customArgs.containsKey(key) ? (T) customArgs.get(key) : null;
+  }
 }

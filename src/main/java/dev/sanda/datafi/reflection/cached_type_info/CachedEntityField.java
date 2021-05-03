@@ -1,20 +1,34 @@
 package dev.sanda.datafi.reflection.cached_type_info;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import java.lang.reflect.Field;
+import lombok.SneakyThrows;
 
 @lombok.Getter
 @lombok.Setter
-@RequiredArgsConstructor
 public class CachedEntityField {
-    @NonNull
-    private Field field;
-    @NonNull
-    private boolean isCollectionOrMap;
-    @NonNull
-    private boolean isNonApiUpdatable;
-    @NonNull
-    private boolean isNonNullable;
+
+  private final Field field;
+  private final boolean isCollectionOrMap;
+  private final boolean isNonApiUpdatable;
+  private final boolean isNonNullable;
+  private final boolean isString;
+
+  public CachedEntityField(
+    Field field,
+    boolean isCollectionOrMap,
+    boolean isNonApiUpdatable,
+    boolean isNonNullable
+  ) {
+    this.field = field;
+    this.isCollectionOrMap = isCollectionOrMap;
+    this.isNonApiUpdatable = isNonApiUpdatable;
+    this.isNonNullable = isNonNullable;
+    this.isString = field.getType().equals(String.class);
+  }
+
+  @SneakyThrows
+  public Object getJsonValue(Object instance) {
+    field.setAccessible(true);
+    return isString ? "\"" + field.get(instance) + "\"" : field.get(instance);
+  }
 }

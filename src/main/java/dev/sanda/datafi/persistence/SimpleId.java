@@ -1,19 +1,19 @@
 package dev.sanda.datafi.persistence;
 
-import lombok.NoArgsConstructor;
-
-import javax.persistence.Embeddable;
 import java.io.Serializable;
+import javax.persistence.Embeddable;
+import lombok.NoArgsConstructor;
 
 @lombok.Getter
 @lombok.Setter
 @Embeddable
 @NoArgsConstructor
 public class SimpleId implements Serializable {
-    private Long id = IdFactory.getNextId();
 
-    @Override
-    public String toString() {
-        return this.id.toString();
-    }
+  private Long id = IdFactory.getNextId();
+
+  @Override
+  public String toString() {
+    return this.id.toString();
+  }
 }

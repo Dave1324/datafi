@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Repeatable(WithNativeQueryAccumulator.class)
 public @interface WithNativeQuery {
-    String name();
+  String name();
 
-    String sql();
+  String sql();
 }

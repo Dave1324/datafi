@@ -6,5 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ElementCollectionTypeResolver {
-    private final Class<?> type;
+
+  private final Class<?> type;
 }

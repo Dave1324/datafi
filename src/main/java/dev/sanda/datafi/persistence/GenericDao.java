@@ -6,5 +6,4 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
 public interface GenericDao<TID, T>
-        extends JpaRepository<T, TID>, JpaSpecificationExecutor<T> {
-}
+  extends JpaRepository<T, TID>, JpaSpecificationExecutor<T> {}

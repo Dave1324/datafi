@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(WithQueryAccumulator.class)
 public @interface WithQuery {
-    String name();
+  String name();
 
-    String jpql();
+  String jpql();
 }

@@ -1,10 +1,9 @@
 package dev.sanda.datafi.persistence;
 
-import lombok.*;
 import dev.sanda.datafi.annotations.attributes.NonApiUpdatable;
-
-import javax.persistence.*;
 import java.io.Serializable;
+import javax.persistence.*;
+import lombok.*;
 
 /**
  * A convenient @MappedSuperclass which takes care of the boilerplate
@@ -20,33 +19,35 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 public abstract class BasePersistableEntity<TID> implements Serializable {
-    /**
-     * If directly inheriting from this class,
-     * take note that only embedded id types
-     * are compatible.
-     */
-    @EmbeddedId
-    @NonNull
-    @NonApiUpdatable
-    @Column(name = "id", unique = true, nullable = false, updatable = false)
-    protected TID id;
-    @NonApiUpdatable
-    private Boolean isFirstPersist = true;
-    @Version
-    @NonApiUpdatable
-    private Long version = 0L;
 
-    @PrePersist
-    public void init() {
-        if (isFirstPersist) {
-            initId();
-            customFirstTimeInit();
-            isFirstPersist = false;
-        }
+  /**
+   * If directly inheriting from this class,
+   * take note that only embedded id types
+   * are compatible.
+   */
+  @EmbeddedId
+  @NonNull
+  @NonApiUpdatable
+  @Column(name = "id", unique = true, nullable = false, updatable = false)
+  protected TID id;
+
+  @NonApiUpdatable
+  private Boolean isFirstPersist = true;
+
+  @Version
+  @NonApiUpdatable
+  private Long version = 0L;
+
+  @PrePersist
+  public void init() {
+    if (isFirstPersist) {
+      initId();
+      customFirstTimeInit();
+      isFirstPersist = false;
     }
+  }
 
-    protected void customFirstTimeInit() {
-    }
+  protected void customFirstTimeInit() {}
 
-    public abstract void initId();
+  public abstract void initId();
 }
