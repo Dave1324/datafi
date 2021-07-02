@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="e922835c-7c67-46a7-bd6b-04f4c4f6b68d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/runtime_services/ReflectionUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/reflection/runtime_services/ReflectionCache.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/sanda/datafi/service/DataManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,6 +113,17 @@
     </key>
   </component>
   <component name="RunManager">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="mvnDebug1" type="Remote">
       <module name="datafi" />
       <option name="USE_SOCKET_TRANSPORT" value="true" />
@@ -230,6 +242,14 @@
       <workItem from="1612086120952" duration="6411000" />
       <workItem from="1613583066138" duration="7000" />
       <workItem from="1613643887230" duration="952000" />
+      <workItem from="1622364973121" duration="1025000" />
+      <workItem from="1622790991769" duration="1298000" />
+      <workItem from="1622965448687" duration="610000" />
+      <workItem from="1623143812873" duration="1377000" />
+      <workItem from="1623145877578" duration="1863000" />
+      <workItem from="1624379307660" duration="651000" />
+      <workItem from="1624782651481" duration="623000" />
+      <workItem from="1625033668987" duration="4088000" />
     </task>
     <servers />
   </component>

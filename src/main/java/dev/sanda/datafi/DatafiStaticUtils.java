@@ -15,8 +15,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.*;
@@ -607,7 +609,7 @@ public class DatafiStaticUtils {
     var commonPrefix = StringUtils.getCommonPrefix(
       qualifiedNames.stream().toArray(String[]::new)
     );
-    if (commonPrefix.endsWith(".")) commonPrefix =
+    if (commonPrefix.contains(".")) commonPrefix =
       commonPrefix.substring(0, commonPrefix.lastIndexOf("."));
     if (!commonPrefix.equals("")) return Collections.singletonList(
       commonPrefix
