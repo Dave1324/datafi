@@ -1,8 +1,5 @@
 package dev.sanda.datafi.code_generator;
 
-import static dev.sanda.datafi.DatafiStaticUtils.*;
-import static javax.lang.model.element.Modifier.PUBLIC;
-
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.*;
 import dev.sanda.datafi.DatafiStaticUtils;
@@ -11,20 +8,24 @@ import dev.sanda.datafi.annotations.TransientModule;
 import dev.sanda.datafi.code_generator.annotated_element_specs.EntityDalSpec;
 import dev.sanda.datafi.code_generator.query.CustomSQLQueryFactory;
 import dev.sanda.datafi.reflection.runtime_services.CollectionsTypeResolver;
-import java.io.IOException;
-import java.util.*;
-import javax.annotation.processing.*;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 import lombok.val;
-import lombok.var;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.processing.*;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
+import java.io.IOException;
+import java.util.*;
+
+import static dev.sanda.datafi.DatafiStaticUtils.*;
+import static javax.lang.model.element.Modifier.PUBLIC;
 
 /**
  * Takes care of generating all the source files needed for a jpa data access layer.
@@ -192,7 +193,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     List<EntityDalSpec> entityDalSpecs,
     RoundEnvironment roundEnvironment
   ) {
-    var mainClass = new ArrayList<>(
+    List<Element> mainClass = new ArrayList<>(
       roundEnvironment.getElementsAnnotatedWith(SpringBootApplication.class)
     );
     if (!mainClass.isEmpty()) {

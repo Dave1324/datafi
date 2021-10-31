@@ -1,5 +1,8 @@
 package dev.sanda.datafi.service;
 
+import static com.google.common.collect.Maps.immutableEntry;
+import static dev.sanda.datafi.DatafiStaticUtils.*;
+
 import com.google.common.collect.Lists;
 import dev.sanda.datafi.DatafiStaticUtils;
 import dev.sanda.datafi.dto.FreeTextSearchPageRequest;
@@ -8,6 +11,12 @@ import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.persistence.GenericDao;
 import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
 import dev.sanda.datafi.reflection.runtime_services.ReflectionCache;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import javax.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
@@ -18,16 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import javax.persistence.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.google.common.collect.Maps.immutableEntry;
-import static dev.sanda.datafi.DatafiStaticUtils.*;
 
 @Service
 @Slf4j

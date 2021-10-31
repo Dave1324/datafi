@@ -1,24 +1,26 @@
 package dev.sanda.datafi.reflection.relationship_synchronization;
 
-import static dev.sanda.datafi.DatafiStaticUtils.toPascalCase;
-import static dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo.genDefaultInstance;
-import static dev.sanda.datafi.reflection.relationship_synchronization.BackpointerType.*;
-
 import dev.sanda.datafi.annotations.attributes.AutoSynchronized;
 import dev.sanda.datafi.reflection.runtime_services.CollectionsTypeResolver;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
+
+import static dev.sanda.datafi.DatafiStaticUtils.determineFieldParameterType;
+import static dev.sanda.datafi.DatafiStaticUtils.toPascalCase;
+import static dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo.genDefaultInstance;
+import static dev.sanda.datafi.reflection.relationship_synchronization.BackpointerType.*;
 
 @Data
 @Slf4j
@@ -198,7 +200,7 @@ public class EntityRelationshipSyncronizer {
           field ->
             isExplicitlyScoped(field, null)
               ? field.getAnnotation(AutoSynchronized.class).referencedBy()
-              : ""
+              : resolveReferencedByFieldName(field)
         )
       ); else {
       apiSpecGettersByFieldName =
@@ -242,10 +244,33 @@ public class EntityRelationshipSyncronizer {
                   apiSpecGettersByFieldName.get(field.getName())
                 )
                   .referencedBy()
-                : ""
+                : resolveReferencedByFieldName(field)
           )
         );
     }
+  }
+
+  @SuppressWarnings("OptionalGetWithoutIsPresent")
+  private String resolveReferencedByFieldName(Field field) {
+    Class toFieldEntityType = determineFieldParameterType(
+      clazz,
+      field,
+      collectionsTypeResolver
+    );
+    Field backReference = Arrays
+      .stream(toFieldEntityType.getDeclaredFields())
+      .filter(
+        candidateField ->
+          determineFieldParameterType(
+            toFieldEntityType,
+            candidateField,
+            collectionsTypeResolver
+          )
+            .equals(clazz)
+      )
+      .findFirst()
+      .get();
+    return backReference.getName();
   }
 
   private boolean isIrrelevantField(Field field) {

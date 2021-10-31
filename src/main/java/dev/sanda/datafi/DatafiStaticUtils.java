@@ -9,25 +9,9 @@ import dev.sanda.datafi.annotations.EntityApiSpec;
 import dev.sanda.datafi.code_generator.annotated_element_specs.EntityDalSpec;
 import dev.sanda.datafi.persistence.Archivable;
 import dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo;
+import dev.sanda.datafi.reflection.runtime_services.CollectionsTypeResolver;
 import dev.sanda.datafi.reflection.runtime_services.ReflectionCache;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import javax.persistence.*;
-import javax.tools.Diagnostic;
 import lombok.val;
-import lombok.var;
 import org.apache.commons.lang3.StringUtils;
 import org.atteo.evo.inflector.English;
 import org.hibernate.proxy.HibernateProxy;
@@ -35,6 +19,21 @@ import org.hibernate.proxy.LazyInitializer;
 import org.springframework.aop.framework.Advised;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.persistence.*;
+import javax.tools.Diagnostic;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class DatafiStaticUtils {
 
@@ -127,6 +126,18 @@ public class DatafiStaticUtils {
       typeUtils.erasure(element.asType()),
       collection
     );
+  }
+
+  public static Class determineFieldParameterType(
+    Class parentClass,
+    Field field,
+    CollectionsTypeResolver collectionsTypeResolver
+  ) {
+    return Collection.class.isAssignableFrom(field.getType())
+      ? collectionsTypeResolver.resolveFor(
+        parentClass.getSimpleName() + "." + field.getName()
+      )
+      : field.getType();
   }
 
   public static void throwEntityNotFoundException(
@@ -606,7 +617,7 @@ public class DatafiStaticUtils {
       )
       .sorted(String::compareTo)
       .collect(Collectors.toList());
-    var commonPrefix = StringUtils.getCommonPrefix(
+    String commonPrefix = StringUtils.getCommonPrefix(
       qualifiedNames.stream().toArray(String[]::new)
     );
     if (commonPrefix.contains(".")) commonPrefix =
@@ -629,7 +640,7 @@ public class DatafiStaticUtils {
       if (commonGroupPrefix.equals("")) {
         currentGrouping.remove(name);
         i--;
-        var newFinalPrefix = StringUtils.getCommonPrefix(
+        String newFinalPrefix = StringUtils.getCommonPrefix(
           currentGrouping.stream().toArray(String[]::new)
         );
         if (newFinalPrefix.endsWith(".")) newFinalPrefix =
@@ -637,7 +648,7 @@ public class DatafiStaticUtils {
         prefixes.add(newFinalPrefix);
         currentGrouping = new HashSet<>();
       } else if (i + 1 >= qualifiedNamesSize && !currentGrouping.isEmpty()) {
-        var newFinalPrefix = StringUtils.getCommonPrefix(
+        String newFinalPrefix = StringUtils.getCommonPrefix(
           currentGrouping.stream().toArray(String[]::new)
         );
         if (newFinalPrefix.endsWith(".")) newFinalPrefix =

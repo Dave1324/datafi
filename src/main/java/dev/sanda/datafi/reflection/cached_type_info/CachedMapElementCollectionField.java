@@ -1,57 +1,35 @@
 package dev.sanda.datafi.reflection.cached_type_info;
 
-import static dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo.genDefaultInstance;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.val;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.val;
-import lombok.var;
+
+import static dev.sanda.datafi.reflection.cached_type_info.CachedEntityTypeInfo.genDefaultInstance;
 
 @Data
 @AllArgsConstructor
-@SuppressWarnings("unchecked")
 public class CachedMapElementCollectionField {
 
   private Field field;
 
+  @SuppressWarnings("unchecked")
   public <TKey, TValue> Map<TKey, TValue> getAllByKey(
     Object ownerInstance,
     Collection<TKey> keys
   ) {
     try {
-      var fieldValue = (Map) field.get(ownerInstance);
+      Map fieldValue = (Map) field.get(ownerInstance);
       if (fieldValue == null) initNullMap(ownerInstance);
       fieldValue = (Map) field.get(ownerInstance);
       val result = new LinkedHashMap<TKey, TValue>();
       for (TKey k : keys) result.put(k, (TValue) fieldValue.get(k));
       return result;
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public void putAll(Object ownerInstance, Map toPut) {
-    try {
-      var fieldValue = (Map) this.field.get(ownerInstance);
-      if (fieldValue == null) initNullMap(ownerInstance);
-      fieldValue = (Map) this.field.get(ownerInstance);
-      fieldValue.putAll(toPut);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public void removeAll(Object ownerInstance, Collection toRemove) {
-    try {
-      var fieldValue = (Map) this.field.get(ownerInstance);
-      if (fieldValue == null) initNullMap(ownerInstance);
-      fieldValue = (Map) this.field.get(ownerInstance);
-      fieldValue.keySet().removeAll(toRemove);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     }
